@@ -70,7 +70,10 @@ enum AppointmentStatusEntity {
   pending,
   confirmed,
   checkedIn,
+  inProgress,
   completed,
   cancelled,
   noShow,
+  rescheduled,
+  waitlisted,
 }

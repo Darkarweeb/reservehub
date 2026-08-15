@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../features/appointments/presentation/providers/appointment_lifecycle_provider.dart';
 import '../../features/scheduling/presentation/providers/appointment_provider.dart';
 import '../../features/scheduling/presentation/providers/time_block_provider.dart';
+import '../../localization/app_strings.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../widgets/empty_state_widget.dart';
@@ -21,6 +23,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedMonth = DateTime.now();
   DateTime _selectedDay = DateTime.now();
 
+  // Bulk selection
+  bool _bulkMode = false;
+  final Set<String> _selectedIds = {};
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +37,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Future<void> _loadData() async {
     final apptProvider = context.read<AppointmentProvider>();
-    final now = DateTime.now();
     final firstDay = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
     final lastDay = DateTime(_focusedMonth.year, _focusedMonth.month + 1, 0);
 
@@ -49,13 +54,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _onDaySelected(DateTime day) {
-    setState(() => _selectedDay = day);
+    setState(() {
+      _selectedDay = day;
+      _bulkMode = false;
+      _selectedIds.clear();
+    });
   }
 
   void _onMonthChanged(DateTime month) {
     setState(() {
       _focusedMonth = month;
       _selectedDay = DateTime(month.year, month.month, 1);
+      _bulkMode = false;
+      _selectedIds.clear();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
@@ -74,13 +85,157 @@ class _CalendarScreenState extends State<CalendarScreen> {
     ).then((_) => _loadData());
   }
 
+  void _toggleBulkMode() {
+    setState(() {
+      _bulkMode = !_bulkMode;
+      _selectedIds.clear();
+    });
+  }
+
+  void _toggleSelect(String id) {
+    setState(() {
+      if (_selectedIds.contains(id)) {
+        _selectedIds.remove(id);
+      } else {
+        _selectedIds.add(id);
+      }
+    });
+  }
+
+  Future<void> _bulkConfirm() async {
+    if (_selectedIds.isEmpty) return;
+    final provider = context.read<AppointmentLifecycleProvider>();
+    final result = await provider.bulkConfirm(_selectedIds.toList());
+    if (!mounted) return;
+    _loadData();
+    setState(() {
+      _bulkMode = false;
+      _selectedIds.clear();
+    });
+    if (result != null) {
+      final failedSuffix = result.failed > 0
+          ? ', ${result.failed} ${AppStrings.bulkFailedSuffix}'
+          : '';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${result.succeeded} ${AppStrings.statusConfirmed.toLowerCase()}$failedSuffix.',
+          ),
+          backgroundColor: AppTheme.success,
+        ),
+      );
+    }
+  }
+
+  Future<void> _bulkCancel() async {
+    if (_selectedIds.isEmpty) return;
+    final reason = await _showBulkReasonDialog();
+    if (reason == null || reason.isEmpty || !mounted) return;
+
+    final provider = context.read<AppointmentLifecycleProvider>();
+    final result = await provider.bulkCancel(
+      _selectedIds.toList(),
+      reason: reason,
+    );
+    if (!mounted) return;
+    _loadData();
+    setState(() {
+      _bulkMode = false;
+      _selectedIds.clear();
+    });
+    if (result != null) {
+      final failedSuffix = result.failed > 0
+          ? ', ${result.failed} ${AppStrings.bulkFailedSuffix}'
+          : '';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${result.succeeded} ${AppStrings.statusCancelled.toLowerCase()}$failedSuffix.',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _bulkComplete() async {
+    if (_selectedIds.isEmpty) return;
+    final provider = context.read<AppointmentLifecycleProvider>();
+    final result = await provider.bulkComplete(_selectedIds.toList());
+    if (!mounted) return;
+    _loadData();
+    setState(() {
+      _bulkMode = false;
+      _selectedIds.clear();
+    });
+    if (result != null) {
+      final failedSuffix = result.failed > 0
+          ? ', ${result.failed} ${AppStrings.bulkFailedSuffix}'
+          : '';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${result.succeeded} ${AppStrings.statusCompleted.toLowerCase()}$failedSuffix.',
+          ),
+          backgroundColor: AppTheme.secondary,
+        ),
+      );
+    }
+  }
+
+  Future<String?> _showBulkReasonDialog() {
+    final ctrl = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(
+          '${AppStrings.cancelAction} ${_selectedIds.length} ${AppStrings.appointments}',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: TextField(
+          controller: ctrl,
+          decoration: InputDecoration(
+            hintText: AppStrings.reasonForCancellation,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          maxLines: 2,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(null),
+            child: Text(AppStrings.back),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.error),
+            onPressed: () => Navigator.of(context).pop(ctrl.text.trim()),
+            child: Text(AppStrings.cancelAll),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBarWidget(
-        title: 'Calendar',
+        title: AppStrings.calendar,
         actions: [
+          // Bulk mode toggle
+          IconButton(
+            icon: Icon(
+              _bulkMode ? Icons.close_rounded : Icons.checklist_rounded,
+              size: 20,
+            ),
+            tooltip: _bulkMode
+                ? AppStrings.exitBulkMode
+                : AppStrings.selectMultiple,
+            onPressed: _toggleBulkMode,
+            color: _bulkMode ? AppTheme.error : AppTheme.primary,
+          ),
           IconButton(
             icon: Container(
               width: 36,
@@ -95,6 +250,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 color: Colors.white,
               ),
             ),
+            tooltip: AppStrings.today,
             onPressed: () => setState(() {
               _selectedDay = DateTime.now();
               _focusedMonth = DateTime.now();
@@ -103,34 +259,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton.small(
-            heroTag: 'block_fab',
-            backgroundColor: AppTheme.surfaceLight,
-            foregroundColor: AppTheme.primary,
-            tooltip: 'Block Time',
-            onPressed: _showCreateBlockDialog,
-            child: const Icon(Icons.block_rounded, size: 18),
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton.extended(
-            heroTag: 'appt_fab',
-            backgroundColor: AppTheme.primary,
-            foregroundColor: Colors.white,
-            label: Text(
-              'New Appointment',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
+      floatingActionButton: _bulkMode
+          ? null
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.small(
+                  heroTag: 'block_fab',
+                  backgroundColor: AppTheme.surfaceLight,
+                  foregroundColor: AppTheme.primary,
+                  tooltip: AppStrings.blockTime,
+                  onPressed: _showCreateBlockDialog,
+                  child: const Icon(Icons.block_rounded, size: 18),
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton.extended(
+                  heroTag: 'appt_fab',
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  label: Text(
+                    AppStrings.nuevaCita,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  icon: const Icon(Icons.add_rounded, size: 18),
+                  onPressed: _showCreateAppointmentDialog,
+                ),
+              ],
             ),
-            icon: const Icon(Icons.add_rounded, size: 18),
-            onPressed: _showCreateAppointmentDialog,
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Consumer<AppointmentProvider>(
           builder: (context, apptProvider, _) {
@@ -184,7 +342,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
-                                '${dayAppointments.length} appts',
+                                '${dayAppointments.length} ${AppStrings.appts}',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -196,6 +354,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                     ),
                   ),
+                  // Bulk action bar
+                  if (_bulkMode)
+                    SliverToBoxAdapter(
+                      child: _BulkActionBar(
+                        selectedCount: _selectedIds.length,
+                        onConfirm: _bulkConfirm,
+                        onCancel: _bulkCancel,
+                        onComplete: _bulkComplete,
+                      ),
+                    ),
                   // Time blocks section
                   if (dayBlocks.isNotEmpty)
                     SliverToBoxAdapter(
@@ -207,15 +375,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           if (ok && mounted) {
                             _loadData();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Time block removed.'),
+                              SnackBar(
+                                content: Text(AppStrings.timeBlockRemoved),
                               ),
                             );
                           }
                         },
                       ),
                     ),
-                  // Appointments section
+                  // Error
                   if (apptProvider.errorMessage != null)
                     SliverToBoxAdapter(
                       child: Padding(
@@ -239,15 +407,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                       ),
                     ),
+                  // Appointments
                   dayAppointments.isEmpty && !apptProvider.isLoading
                       ? SliverFillRemaining(
                           child: EmptyStateWidget(
                             icon: Icons.event_available_rounded,
-                            title: 'No appointments',
-                            subtitle:
-                                'This day is free. Add an appointment to fill the schedule.',
-                            ctaLabel: 'New Appointment',
+                            title: AppStrings.emptyAppointments,
+                            subtitle: AppStrings.emptyCalendarSubtitle,
+                            ctaLabel: AppStrings.nuevaCita,
                             onCta: _showCreateAppointmentDialog,
+                          ),
+                        )
+                      : _bulkMode
+                      ? SliverToBoxAdapter(
+                          child: _BulkSelectableList(
+                            appointments: dayAppointments
+                                .map(
+                                  (a) => {
+                                    'id': a.id,
+                                    'customerName': a.customerName ?? 'Guest',
+                                    'service': a.serviceName ?? '—',
+                                    'time': _formatTime(a.startsAt),
+                                    'duration': '${a.durationMins} min',
+                                    'employee': a.employeeName ?? '—',
+                                    'status': _statusString(a.status),
+                                    'price': a.totalPrice.toStringAsFixed(0),
+                                  },
+                                )
+                                .toList(),
+                            selectedIds: _selectedIds,
+                            onToggle: _toggleSelect,
                           ),
                         )
                       : SliverToBoxAdapter(
@@ -263,13 +452,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     'employee': a.employeeName ?? '—',
                                     'status': _statusString(a.status),
                                     'price': a.totalPrice.toStringAsFixed(0),
-                                    'avatarUrl':
-                                        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=96&h=96&fit=crop',
-                                    'avatarLabel': 'Customer avatar',
-                                    'isManual': a.isManual,
                                   },
                                 )
                                 .toList(),
+                            onRefreshCalendar: _loadData,
                           ),
                         ),
                   const SliverToBoxAdapter(child: SizedBox(height: 120)),
@@ -284,20 +470,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   String _formatSelectedDay(DateTime d) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      AppStrings.monthJan,
+      AppStrings.monthFeb,
+      AppStrings.monthMar,
+      AppStrings.monthApr,
+      AppStrings.monthMay,
+      AppStrings.monthJun,
+      AppStrings.monthJul,
+      AppStrings.monthAug,
+      AppStrings.monthSep,
+      AppStrings.monthOct,
+      AppStrings.monthNov,
+      AppStrings.monthDec,
     ];
-    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const weekdays = [
+      AppStrings.weekdayShortMon,
+      AppStrings.weekdayShortTue,
+      AppStrings.weekdayShortWed,
+      AppStrings.weekdayShortThu,
+      AppStrings.weekdayShortFri,
+      AppStrings.weekdayShortSat,
+      AppStrings.weekdayShortSun,
+    ];
     return '${weekdays[d.weekday - 1]}, ${months[d.month - 1]} ${d.day}';
   }
 
@@ -311,12 +505,222 @@ class _CalendarScreenState extends State<CalendarScreen> {
   String _statusString(AppointmentStatusEntity status) {
     return switch (status) {
       AppointmentStatusEntity.confirmed => 'confirmed',
-      AppointmentStatusEntity.checkedIn => 'checked_in',
+      AppointmentStatusEntity.checkedIn => 'in_progress',
+      AppointmentStatusEntity.inProgress => 'in_progress',
       AppointmentStatusEntity.completed => 'completed',
       AppointmentStatusEntity.cancelled => 'cancelled',
       AppointmentStatusEntity.noShow => 'no_show',
+      AppointmentStatusEntity.rescheduled => 'rescheduled',
+      AppointmentStatusEntity.waitlisted => 'waitlisted',
       AppointmentStatusEntity.pending => 'pending',
     };
+  }
+}
+
+// ─── Bulk Action Bar ──────────────────────────────────────────────────────────
+
+class _BulkActionBar extends StatelessWidget {
+  final int selectedCount;
+  final VoidCallback onConfirm;
+  final VoidCallback onCancel;
+  final VoidCallback onComplete;
+
+  const _BulkActionBar({
+    required this.selectedCount,
+    required this.onConfirm,
+    required this.onCancel,
+    required this.onComplete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AppointmentLifecycleProvider>(
+      builder: (_, provider, __) => Container(
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppTheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.secondary.withAlpha(50)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              selectedCount == 0
+                  ? AppStrings.tapToSelect
+                  : '$selectedCount ${AppStrings.selectedCount}',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.secondary,
+              ),
+            ),
+            if (selectedCount > 0) ...[
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                children: [
+                  _BulkButton(
+                    label: AppStrings.confirmAll,
+                    icon: Icons.check_rounded,
+                    color: AppTheme.success,
+                    isLoading: provider.isBulkActing,
+                    onTap: onConfirm,
+                  ),
+                  _BulkButton(
+                    label: AppStrings.completeAll,
+                    icon: Icons.task_alt_rounded,
+                    color: AppTheme.secondary,
+                    isLoading: provider.isBulkActing,
+                    onTap: onComplete,
+                  ),
+                  _BulkButton(
+                    label: AppStrings.cancelAll,
+                    icon: Icons.close_rounded,
+                    color: AppTheme.error,
+                    isLoading: provider.isBulkActing,
+                    onTap: onCancel,
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BulkButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  const _BulkButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: isLoading ? null : onTap,
+      icon: isLoading
+          ? SizedBox(
+              width: 12,
+              height: 12,
+              child: CircularProgressIndicator(strokeWidth: 2, color: color),
+            )
+          : Icon(icon, size: 13, color: color),
+      label: Text(
+        label,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: color.withAlpha(100)),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+}
+
+// ─── Bulk Selectable List ─────────────────────────────────────────────────────
+
+class _BulkSelectableList extends StatelessWidget {
+  final List<Map<String, dynamic>> appointments;
+  final Set<String> selectedIds;
+  final void Function(String id) onToggle;
+
+  const _BulkSelectableList({
+    required this.appointments,
+    required this.selectedIds,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: appointments.map((apt) {
+          final id = apt['id'] as String? ?? '';
+          final isSelected = selectedIds.contains(id);
+          return GestureDetector(
+            onTap: () => onToggle(id),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppTheme.secondaryContainer
+                    : AppTheme.surfaceLight,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isSelected
+                      ? AppTheme.secondary
+                      : AppTheme.outlineVariantLight,
+                  width: isSelected ? 2 : 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    isSelected
+                        ? Icons.check_circle_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    size: 20,
+                    color: isSelected
+                        ? AppTheme.secondary
+                        : const Color(0xFF94A3B8),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          apt['customerName'] as String? ?? 'Guest',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        Text(
+                          '${apt['service'] ?? '—'} · ${apt['time'] ?? ''}',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    apt['status'] as String? ?? '',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      color: const Color(0xFF94A3B8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
 }
 
@@ -336,7 +740,7 @@ class _TimeBlocksSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Blocked Periods',
+            AppStrings.blockedPeriods,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -381,7 +785,7 @@ class _TimeBlockItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  block['title'] as String? ?? 'Block',
+                  block['title'] as String? ?? AppStrings.timeBlock,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -476,15 +880,13 @@ class _ManualAppointmentDialogState extends State<_ManualAppointmentDialog> {
     if (!mounted) return;
     if (ok) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Appointment created successfully.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(AppStrings.appointmentCreatedMsg)));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            provider.errorMessage ?? 'Failed to create appointment.',
-          ),
+          content: Text(provider.errorMessage ?? AppStrings.failedToCreate),
           backgroundColor: AppTheme.error,
         ),
       );
@@ -495,7 +897,7 @@ class _ManualAppointmentDialogState extends State<_ManualAppointmentDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        'New Manual Appointment',
+        AppStrings.newManualAppointment,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           fontWeight: FontWeight.w700,
@@ -510,30 +912,33 @@ class _ManualAppointmentDialogState extends State<_ManualAppointmentDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildField(_nameCtrl, 'Customer Name', required: true),
+                _buildField(
+                  _nameCtrl,
+                  AppStrings.customerNameLabel,
+                  required: true,
+                ),
                 const SizedBox(height: 12),
                 _buildField(
                   _branchIdCtrl,
-                  'Branch ID',
+                  AppStrings.branchIdLabel,
                   required: true,
-                  hint: 'UUID of the branch',
+                  hint: AppStrings.branchIdHint,
                 ),
                 const SizedBox(height: 12),
                 _buildField(
                   _serviceIdCtrl,
-                  'Service ID',
+                  AppStrings.serviceIdLabel,
                   required: true,
-                  hint: 'UUID of the service',
+                  hint: AppStrings.serviceIdHint,
                 ),
                 const SizedBox(height: 12),
                 _buildField(
                   _employeeIdCtrl,
-                  'Employee ID',
+                  AppStrings.employeeIdLabel,
                   required: true,
-                  hint: 'UUID of the employee',
+                  hint: AppStrings.employeeIdHint,
                 ),
                 const SizedBox(height: 12),
-                // Time picker
                 InkWell(
                   onTap: _pickTime,
                   borderRadius: BorderRadius.circular(8),
@@ -563,11 +968,10 @@ class _ManualAppointmentDialogState extends State<_ManualAppointmentDialog> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Source dropdown
                 DropdownButtonFormField<String>(
                   initialValue: _source,
                   decoration: InputDecoration(
-                    labelText: 'Booking Source',
+                    labelText: AppStrings.bookingSourceLabel,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -576,17 +980,26 @@ class _ManualAppointmentDialogState extends State<_ManualAppointmentDialog> {
                       vertical: 14,
                     ),
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'manual', child: Text('Manual')),
-                    DropdownMenuItem(value: 'phone', child: Text('Phone')),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'manual',
+                      child: Text(AppStrings.bookingSourceManual),
+                    ),
+                    DropdownMenuItem(
+                      value: 'phone',
+                      child: Text(AppStrings.bookingSourcePhone),
+                    ),
                     DropdownMenuItem(
                       value: 'whatsapp',
-                      child: Text('WhatsApp'),
+                      child: Text(AppStrings.bookingSourceWhatsApp),
                     ),
-                    DropdownMenuItem(value: 'walk_in', child: Text('Walk-in')),
+                    DropdownMenuItem(
+                      value: 'walk_in',
+                      child: Text(AppStrings.bookingSourceWalkIn),
+                    ),
                     DropdownMenuItem(
                       value: 'instagram',
-                      child: Text('Instagram'),
+                      child: Text(AppStrings.bookingSourceInstagram),
                     ),
                   ],
                   onChanged: (v) => setState(() => _source = v ?? 'manual'),
@@ -594,7 +1007,7 @@ class _ManualAppointmentDialogState extends State<_ManualAppointmentDialog> {
                 const SizedBox(height: 12),
                 _buildField(
                   _notesCtrl,
-                  'Notes (optional)',
+                  AppStrings.notesOptional,
                   required: false,
                   maxLines: 2,
                 ),
@@ -606,7 +1019,7 @@ class _ManualAppointmentDialogState extends State<_ManualAppointmentDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.cancel),
         ),
         Consumer<AppointmentProvider>(
           builder: (_, provider, __) => FilledButton(
@@ -620,7 +1033,7 @@ class _ManualAppointmentDialogState extends State<_ManualAppointmentDialog> {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Create'),
+                : Text(AppStrings.createAction),
           ),
         ),
       ],
@@ -647,7 +1060,9 @@ class _ManualAppointmentDialogState extends State<_ManualAppointmentDialog> {
         ),
       ),
       validator: required
-          ? (v) => (v == null || v.trim().isEmpty) ? '$label is required' : null
+          ? (v) => (v == null || v.trim().isEmpty)
+                ? '$label ${AppStrings.fieldRequired}'
+                : null
           : null,
     );
   }
@@ -716,11 +1131,13 @@ class _TimeBlockDialogState extends State<_TimeBlockDialog> {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Time block created.')));
+      ).showSnackBar(SnackBar(content: Text(AppStrings.timeBlockCreated)));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(provider.errorMessage ?? 'Failed to create block.'),
+          content: Text(
+            provider.errorMessage ?? AppStrings.failedToCreateBlock,
+          ),
           backgroundColor: AppTheme.error,
         ),
       );
@@ -731,7 +1148,7 @@ class _TimeBlockDialogState extends State<_TimeBlockDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        'Block Time',
+        AppStrings.blockTime,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           fontWeight: FontWeight.w700,
@@ -748,8 +1165,8 @@ class _TimeBlockDialogState extends State<_TimeBlockDialog> {
               TextFormField(
                 controller: _titleCtrl,
                 decoration: InputDecoration(
-                  labelText: 'Title',
-                  hintText: 'e.g. Lunch, Meeting, Maintenance',
+                  labelText: AppStrings.titleLabel,
+                  hintText: AppStrings.titleHint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -759,15 +1176,15 @@ class _TimeBlockDialogState extends State<_TimeBlockDialog> {
                   ),
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Title is required'
+                    ? AppStrings.titleRequired
                     : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _branchIdCtrl,
                 decoration: InputDecoration(
-                  labelText: 'Branch ID',
-                  hintText: 'UUID of the branch',
+                  labelText: AppStrings.branchIdLabel,
+                  hintText: AppStrings.branchIdHint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -777,7 +1194,7 @@ class _TimeBlockDialogState extends State<_TimeBlockDialog> {
                   ),
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Branch ID is required'
+                    ? AppStrings.branchIdRequired
                     : null,
               ),
               const SizedBox(height: 12),
@@ -787,7 +1204,10 @@ class _TimeBlockDialogState extends State<_TimeBlockDialog> {
                     child: InkWell(
                       onTap: _pickStart,
                       borderRadius: BorderRadius.circular(8),
-                      child: _timeTile('Start', _startTime.format(context)),
+                      child: _timeTile(
+                        AppStrings.startLabel,
+                        _startTime.format(context),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -795,7 +1215,10 @@ class _TimeBlockDialogState extends State<_TimeBlockDialog> {
                     child: InkWell(
                       onTap: _pickEnd,
                       borderRadius: BorderRadius.circular(8),
-                      child: _timeTile('End', _endTime.format(context)),
+                      child: _timeTile(
+                        AppStrings.endLabel,
+                        _endTime.format(context),
+                      ),
                     ),
                   ),
                 ],
@@ -804,7 +1227,7 @@ class _TimeBlockDialogState extends State<_TimeBlockDialog> {
               TextFormField(
                 controller: _reasonCtrl,
                 decoration: InputDecoration(
-                  labelText: 'Reason (optional)',
+                  labelText: AppStrings.reasonOptional,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -821,7 +1244,7 @@ class _TimeBlockDialogState extends State<_TimeBlockDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.cancel),
         ),
         Consumer<TimeBlockProvider>(
           builder: (_, provider, __) => FilledButton(
@@ -835,7 +1258,7 @@ class _TimeBlockDialogState extends State<_TimeBlockDialog> {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Block'),
+                : Text(AppStrings.blockAction),
           ),
         ),
       ],

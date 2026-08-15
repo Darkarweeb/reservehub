@@ -6,9 +6,12 @@ enum AppointmentStatus {
   pending,
   confirmed,
   checkedIn,
+  inProgress,
   completed,
   cancelled,
   noShow,
+  rescheduled,
+  waitlisted,
 }
 
 extension AppointmentStatusExt on AppointmentStatus {
@@ -20,12 +23,18 @@ extension AppointmentStatusExt on AppointmentStatus {
         return 'Confirmed';
       case AppointmentStatus.checkedIn:
         return 'Checked In';
+      case AppointmentStatus.inProgress:
+        return 'In Progress';
       case AppointmentStatus.completed:
         return 'Completed';
       case AppointmentStatus.cancelled:
         return 'Cancelled';
       case AppointmentStatus.noShow:
         return 'No Show';
+      case AppointmentStatus.rescheduled:
+        return 'Rescheduled';
+      case AppointmentStatus.waitlisted:
+        return 'Waitlisted';
     }
   }
 
@@ -37,12 +46,18 @@ extension AppointmentStatusExt on AppointmentStatus {
         return AppTheme.secondary;
       case AppointmentStatus.checkedIn:
         return const Color(0xFF7C3AED);
+      case AppointmentStatus.inProgress:
+        return const Color(0xFF7C3AED);
       case AppointmentStatus.completed:
         return AppTheme.success;
       case AppointmentStatus.cancelled:
         return AppTheme.error;
       case AppointmentStatus.noShow:
         return const Color(0xFF6B7280);
+      case AppointmentStatus.rescheduled:
+        return AppTheme.warning;
+      case AppointmentStatus.waitlisted:
+        return const Color(0xFF0EA5E9);
     }
   }
 
@@ -54,12 +69,18 @@ extension AppointmentStatusExt on AppointmentStatus {
         return AppTheme.secondaryContainer;
       case AppointmentStatus.checkedIn:
         return const Color(0xFFF3E8FF);
+      case AppointmentStatus.inProgress:
+        return const Color(0xFFF3E8FF);
       case AppointmentStatus.completed:
         return AppTheme.successContainer;
       case AppointmentStatus.cancelled:
         return AppTheme.errorContainer;
       case AppointmentStatus.noShow:
         return const Color(0xFFF3F4F6);
+      case AppointmentStatus.rescheduled:
+        return AppTheme.warningContainer;
+      case AppointmentStatus.waitlisted:
+        return const Color(0xFFE0F2FE);
     }
   }
 
@@ -71,12 +92,18 @@ extension AppointmentStatusExt on AppointmentStatus {
         return Icons.check_circle_outline_rounded;
       case AppointmentStatus.checkedIn:
         return Icons.login_rounded;
+      case AppointmentStatus.inProgress:
+        return Icons.play_circle_outline_rounded;
       case AppointmentStatus.completed:
         return Icons.task_alt_rounded;
       case AppointmentStatus.cancelled:
         return Icons.cancel_outlined;
       case AppointmentStatus.noShow:
         return Icons.person_off_outlined;
+      case AppointmentStatus.rescheduled:
+        return Icons.update_rounded;
+      case AppointmentStatus.waitlisted:
+        return Icons.hourglass_empty_rounded;
     }
   }
 }

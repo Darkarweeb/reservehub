@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 
 class CustomerFilterWidget extends StatelessWidget {
@@ -13,12 +14,29 @@ class CustomerFilterWidget extends StatelessWidget {
   });
 
   static const List<Map<String, dynamic>> _filters = [
-    {'label': 'All', 'icon': Icons.people_outline_rounded},
-    {'label': 'Active', 'icon': Icons.check_circle_outline_rounded},
-    {'label': 'VIP', 'icon': Icons.star_outline_rounded},
-    {'label': 'New', 'icon': Icons.fiber_new_outlined},
-    {'label': 'At-Risk', 'icon': Icons.warning_amber_outlined},
+    {'key': 'All', 'icon': Icons.people_outline_rounded},
+    {'key': 'Active', 'icon': Icons.check_circle_outline_rounded},
+    {'key': 'VIP', 'icon': Icons.star_outline_rounded},
+    {'key': 'New', 'icon': Icons.fiber_new_outlined},
+    {'key': 'At-Risk', 'icon': Icons.warning_amber_outlined},
   ];
+
+  String _labelFor(String key) {
+    switch (key) {
+      case 'All':
+        return AppStrings.customerFilterAll;
+      case 'Active':
+        return AppStrings.customerFilterActive;
+      case 'VIP':
+        return AppStrings.customerFilterVip;
+      case 'New':
+        return AppStrings.customerFilterNew;
+      case 'At-Risk':
+        return AppStrings.customerFilterAtRisk;
+      default:
+        return key;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +49,12 @@ class CustomerFilterWidget extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           final filter = _filters[i];
-          final label = filter['label'] as String;
+          final key = filter['key'] as String;
           final icon = filter['icon'] as IconData;
-          final isActive = selected == label;
+          final isActive = selected == key;
+          final label = _labelFor(key);
           return GestureDetector(
-            onTap: () => onSelected(label),
+            onTap: () => onSelected(key),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

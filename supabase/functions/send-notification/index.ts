@@ -18,7 +18,15 @@ const BRAND = {
   textLight: "#64748B",
 };
 
+// ─── App URL (production-configurable) ───────────────────────────────────────
+// Set RESERVEHUB_APP_URL in Edge Function secrets for production.
+// Falls back to the published preview URL.
+function getAppUrl(): string {
+  return Deno.env.get("RESERVEHUB_APP_URL") || "https://reservehub-9q3y-prod.rocketpreview.app";
+}
+
 function emailLayout(content: string, previewText: string): string {
+  const appUrl = getAppUrl();
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -111,7 +119,7 @@ function emailLayout(content: string, previewText: string): string {
         <p>This email was sent by <strong>ReserveHub</strong> on behalf of the business.<br/>
         If you have questions, please contact the business directly.</p>
         <p style="margin-top:8px;">
-          <a href="https://reservehub3396.builtwithrocket.new">ReserveHub</a> &middot; 
+          <a href="${appUrl}">ReserveHub</a> &middot; 
           Appointment Management Platform
         </p>
       </div>
@@ -165,8 +173,8 @@ function referenceBox(ref: string): string {
   </div>`;
 }
 
-function manageLink(slug: string, token: string): string {
-  const url = `https://reservehub3396.builtwithrocket.new/appointments/${token}`;
+function manageLink(token: string): string {
+  const url = `${getAppUrl()}/appointments/${token}`;
   return `<a href="${url}" class="cta-button">Manage Appointment</a>
   <p style="text-align:center;font-size:12px;color:${BRAND.textLight};">Or copy this link: <a href="${url}" style="color:${BRAND.accent};">${url}</a></p>`;
 }
@@ -174,17 +182,19 @@ function manageLink(slug: string, token: string): string {
 // ─── Template: Customer Booking Confirmation ──────────────────────────────────
 function templateCustomerBookingConfirmation(data: Record<string, unknown>, token: string): { subject: string; html: string; text: string } {
   const subject = `Booking Confirmed – ${data.service_name} at ${data.business_name}`;
+  const appUrl = getAppUrl();
   const content = `
     <h1>Your appointment is booked! 🎉</h1>
     <p class="greeting">Hi ${data.customer_name},</p>
     <p>Your appointment has been successfully booked. Here are your details:</p>
     ${appointmentCard(data)}
     ${referenceBox(String(data.appointment_reference || ""))}
-    ${manageLink(String(data.business_slug || ""), token)}
+    ${token ? manageLink(token) : ""}
     <hr class="divider" />
     <p style="font-size:13px;color:${BRAND.textLight};">Need to cancel or reschedule? Use the link above to manage your appointment. Please check the cancellation policy before making changes.</p>
   `;
-  const text = `Booking Confirmed\n\nHi ${data.customer_name},\n\nYour appointment is confirmed.\n\nBusiness: ${data.business_name}\nService: ${data.service_name}\nDate: ${data.appointment_date}\nTime: ${data.appointment_time} ${data.appointment_timezone}\nReference: ${data.appointment_reference}\n\nManage: https://reservehub3396.builtwithrocket.new/appointments/${token}`;
+  const manageUrl = token ? `${appUrl}/appointments/${token}` : appUrl;
+  const text = `Booking Confirmed\n\nHi ${data.customer_name},\n\nYour appointment is confirmed.\n\nBusiness: ${data.business_name}\nService: ${data.service_name}\nDate: ${data.appointment_date}\nTime: ${data.appointment_time} ${data.appointment_timezone}\nReference: ${data.appointment_reference}\n\nManage: ${manageUrl}`;
   return { subject, html: emailLayout(content, `Your ${data.service_name} appointment is confirmed`), text };
 }
 
@@ -248,53 +258,70 @@ function templateBusinessCancellationNotification(data: Record<string, unknown>)
   return { subject, html: emailLayout(content, `Cancellation: ${data.customer_name}`), text };
 }
 
-// ─── Template: Appointment Reminder ──────────────────────────────────────────
-function templateAppointmentReminder(data: Record<string, unknown>, token: string): { subject: string; html: string; text: string } {
-  const hours = Number(data.hours_before || 24);
-  const timeLabel = hours <= 2 ? `${hours} hours` : `${hours} hours`;
-  const subject = `Reminder: ${data.service_name} in ${timeLabel} – ${data.business_name}`;
+// ─── Template: Customer Rescheduled ──────────────────────────────────────────
+function templateCustomerRescheduled(data: Record<string, unknown>, token: string): { subject: string; html: string; text: string } {
+  const subject = `Appointment Rescheduled – ${data.service_name} at ${data.business_name}`;
+  const appUrl = getAppUrl();
   const content = `
-    <h1>Appointment reminder ⏰</h1>
+    <h1>Appointment rescheduled</h1>
     <p class="greeting">Hi ${data.customer_name},</p>
-    <p>This is a friendly reminder that you have an appointment coming up in <strong>${timeLabel}</strong>.</p>
+    <div class="alert-box alert-success">
+      <p style="margin:0;font-size:14px;color:#065F46;">Your appointment has been rescheduled to a new time.</p>
+    </div>
+    ${appointmentCard({ ...data, appointment_status: "rescheduled" })}
+    ${referenceBox(String(data.appointment_reference || ""))}
+    ${token ? manageLink(token) : ""}
+    <hr class="divider" />
+    <p style="font-size:13px;color:${BRAND.textLight};">If you need to make further changes, use the link above.</p>
+  `;
+  const manageUrl = token ? `${appUrl}/appointments/${token}` : appUrl;
+  const text = `Appointment Rescheduled\n\nHi ${data.customer_name},\n\nYour appointment has been rescheduled.\n\nBusiness: ${data.business_name}\nService: ${data.service_name}\nNew Date: ${data.appointment_date}\nNew Time: ${data.appointment_time}\nReference: ${data.appointment_reference}\n\nManage: ${manageUrl}`;
+  return { subject, html: emailLayout(content, `Your appointment has been rescheduled`), text };
+}
+
+// ─── Template: Appointment Reminder ──────────────────────────────────────────
+function templateAppointmentReminder(data: Record<string, unknown>, token: string, hoursLabel: string): { subject: string; html: string; text: string } {
+  const subject = `Reminder: ${data.service_name} at ${data.business_name} – ${hoursLabel}`;
+  const appUrl = getAppUrl();
+  const content = `
+    <h1>Appointment reminder</h1>
+    <p class="greeting">Hi ${data.customer_name},</p>
+    <p>This is a reminder that you have an upcoming appointment <strong>${hoursLabel}</strong>.</p>
     ${appointmentCard(data)}
     ${referenceBox(String(data.appointment_reference || ""))}
-    ${manageLink(String(data.business_slug || ""), token)}
+    ${token ? manageLink(token) : ""}
     <hr class="divider" />
     <p style="font-size:13px;color:${BRAND.textLight};">If you need to cancel or reschedule, please do so as soon as possible to respect the business's cancellation policy.</p>
   `;
-  const text = `Appointment Reminder\n\nHi ${data.customer_name},\n\nYou have an appointment in ${timeLabel}.\n\nBusiness: ${data.business_name}\nService: ${data.service_name}\nDate: ${data.appointment_date}\nTime: ${data.appointment_time}\nReference: ${data.appointment_reference}\n\nManage: https://reservehub3396.builtwithrocket.new/appointments/${token}`;
-  return { subject, html: emailLayout(content, `Reminder: ${data.service_name} in ${timeLabel}`), text };
+  const manageUrl = token ? `${appUrl}/appointments/${token}` : appUrl;
+  const text = `Appointment Reminder\n\nHi ${data.customer_name},\n\nYou have an appointment ${hoursLabel}.\n\nBusiness: ${data.business_name}\nService: ${data.service_name}\nDate: ${data.appointment_date}\nTime: ${data.appointment_time}\nReference: ${data.appointment_reference}\n\nManage: ${manageUrl}`;
+  return { subject, html: emailLayout(content, `Reminder: ${data.service_name} ${hoursLabel}`), text };
 }
 
-// ─── Template: Daily Business Summary ────────────────────────────────────────
-function templateDailyBusinessSummary(data: Record<string, unknown>): { subject: string; html: string; text: string } {
+// ─── Template: Daily Summary ──────────────────────────────────────────────────
+function templateDailySummary(data: Record<string, unknown>): { subject: string; html: string; text: string } {
+  const subject = `Daily Summary – ${data.business_name} – ${data.summary_date}`;
   const appointments = (data.appointments as Array<Record<string, unknown>>) || [];
-  const count = Number(data.appointment_count || 0);
-  const subject = `Daily Summary – ${count} appointment${count !== 1 ? "s" : ""} today (${data.summary_date})`;
-
-  let tableRows = "";
-  if (appointments.length > 0) {
-    tableRows = appointments.map((a) => `
-      <tr>
-        <td>${a.start_time || ""}</td>
-        <td>${a.customer || "Guest"}</td>
-        <td>${a.service || ""}</td>
-        <td>${a.employee || "—"}</td>
-        <td><span class="status-badge status-${String(a.status || "pending").toLowerCase()}">${a.status || ""}</span></td>
-      </tr>
-    `).join("");
-  }
+  const rows = appointments.map((a) => `
+    <tr>
+      <td>${a.time || ""}</td>
+      <td>${a.customer_name || ""}</td>
+      <td>${a.service_name || ""}</td>
+      <td>${a.employee_name || ""}</td>
+      <td><span class="status-badge status-${String(a.status || "pending").toLowerCase()}">${a.status || ""}</span></td>
+    </tr>
+  `).join("");
 
   const content = `
     <h1>Daily appointment summary</h1>
-    <p class="greeting">Good morning, ${data.business_name} team!</p>
+    <p class="greeting">Hi ${data.business_name} team,</p>
     <p>Here is your appointment summary for <strong>${data.summary_date}</strong>.</p>
-    <div style="display:flex;align-items:center;gap:12px;margin:20px 0;">
-      <span style="font-size:32px;font-weight:800;color:${BRAND.accent};">${count}</span>
-      <span style="font-size:16px;color:${BRAND.textLight};">appointment${count !== 1 ? "s" : ""} scheduled today</span>
+    <div style="margin:16px 0;padding:12px 16px;background:${BRAND.accentLight};border-radius:8px;display:flex;gap:24px;flex-wrap:wrap;">
+      <div><span style="font-size:24px;font-weight:800;color:${BRAND.accent};">${data.total_count || 0}</span><br/><span style="font-size:12px;color:${BRAND.textLight};">Total</span></div>
+      <div><span style="font-size:24px;font-weight:800;color:#065F46;">${data.confirmed_count || 0}</span><br/><span style="font-size:12px;color:${BRAND.textLight};">Confirmed</span></div>
+      <div><span style="font-size:24px;font-weight:800;color:#92400E;">${data.pending_count || 0}</span><br/><span style="font-size:12px;color:${BRAND.textLight};">Pending</span></div>
     </div>
-    ${count > 0 ? `
+    ${appointments.length > 0 ? `
     <table class="summary-table">
       <thead>
         <tr>
@@ -305,38 +332,13 @@ function templateDailyBusinessSummary(data: Record<string, unknown>): { subject:
           <th>Status</th>
         </tr>
       </thead>
-      <tbody>${tableRows}</tbody>
-    </table>
-    ` : `
-    <div class="alert-box alert-success">
-      <p style="margin:0;font-size:14px;color:#065F46;">No appointments scheduled for today. Enjoy the day!</p>
-    </div>
-    `}
+      <tbody>${rows}</tbody>
+    </table>` : `<p style="text-align:center;color:${BRAND.textLight};padding:24px 0;">No appointments scheduled for this day.</p>`}
     <hr class="divider" />
     <p style="font-size:13px;color:${BRAND.textLight};">Log in to your ReserveHub dashboard to manage today's schedule.</p>
   `;
-  const text = `Daily Summary – ${data.business_name}\n\n${count} appointment(s) for ${data.summary_date}\n\n${appointments.map((a) => `${a.start_time} – ${a.customer} – ${a.service}`).join("\n")}`;
-  return { subject, html: emailLayout(content, `${count} appointment${count !== 1 ? "s" : ""} today`), text };
-}
-
-// ─── Template: Appointment Reschedule ────────────────────────────────────────
-function templateAppointmentRescheduled(data: Record<string, unknown>, token: string): { subject: string; html: string; text: string } {
-  const isCustomer = data.recipient_role === "customer";
-  const subject = isCustomer
-    ? `Appointment Rescheduled – ${data.service_name} at ${data.business_name}`
-    : `Appointment Rescheduled – ${data.customer_name} (${data.service_name})`;
-  const content = `
-    <h1>Appointment rescheduled</h1>
-    <p class="greeting">Hi ${isCustomer ? data.customer_name : `${data.business_name} team`},</p>
-    <div class="alert-box alert-warning">
-      <p style="margin:0;font-size:14px;color:#92400E;">This appointment has been rescheduled to a new date/time.</p>
-    </div>
-    ${appointmentCard({ ...data, appointment_status: "rescheduled" })}
-    ${referenceBox(String(data.appointment_reference || ""))}
-    ${isCustomer ? manageLink(String(data.business_slug || ""), token) : ""}
-  `;
-  const text = `Appointment Rescheduled\n\nService: ${data.service_name}\nNew Date: ${data.appointment_date}\nNew Time: ${data.appointment_time}\nReference: ${data.appointment_reference}`;
-  return { subject, html: emailLayout(content, `Appointment rescheduled`), text };
+  const text = `Daily Summary – ${data.business_name} – ${data.summary_date}\n\nTotal: ${data.total_count || 0} | Confirmed: ${data.confirmed_count || 0} | Pending: ${data.pending_count || 0}\n\n${appointments.map((a) => `${a.time} – ${a.customer_name} – ${a.service_name}`).join("\n")}`;
+  return { subject, html: emailLayout(content, `${data.total_count || 0} appointments today`), text };
 }
 
 // ─── Template Router ──────────────────────────────────────────────────────────
@@ -345,37 +347,37 @@ function buildEmail(
   data: Record<string, unknown>,
   token: string
 ): { subject: string; html: string; text: string } | null {
-  const recipientRole = String(data.recipient_role || "customer");
-
   switch (event) {
     case "appointment_created":
-    case "appointment_confirmed":
-      if (recipientRole === "customer") return templateCustomerBookingConfirmation(data, token);
-      if (recipientRole === "business") return templateBusinessNewAppointment(data);
-      break;
     case "new_appointment":
-      return templateBusinessNewAppointment(data);
+      return templateCustomerBookingConfirmation(data, token);
+    case "appointment_confirmed":
+      return templateCustomerBookingConfirmation(data, token);
     case "appointment_cancelled":
-      if (recipientRole === "customer") return templateCustomerCancellationConfirmation(data);
-      if (recipientRole === "business") return templateBusinessCancellationNotification(data);
-      break;
+      if (data.recipient_type === "business") {
+        return templateBusinessCancellationNotification(data);
+      }
+      return templateCustomerCancellationConfirmation(data);
     case "appointment_rescheduled":
-      return templateAppointmentRescheduled(data, token);
+      return templateCustomerRescheduled(data, token);
     case "appointment_reminder":
     case "appointment_reminder_24h":
+      return templateAppointmentReminder(data, token, "in 24 hours");
     case "appointment_reminder_2h":
-      return templateAppointmentReminder(data, token);
+      return templateAppointmentReminder(data, token, "in 2 hours");
     case "daily_appointment_summary":
-      return templateDailyBusinessSummary(data);
+      return templateDailySummary(data);
+    case "business_new_appointment":
+      return templateBusinessNewAppointment(data);
+    default:
+      return null;
   }
-  return null;
 }
 
-// ─── Exponential Backoff ──────────────────────────────────────────────────────
+// ─── Retry backoff ────────────────────────────────────────────────────────────
 function nextRetryAt(attemptCount: number): string {
-  const delaySeconds = Math.min(60 * Math.pow(2, attemptCount), 3600); // max 1h
-  const next = new Date(Date.now() + delaySeconds * 1000);
-  return next.toISOString();
+  const delayMinutes = Math.min(Math.pow(2, attemptCount) * 5, 60);
+  return new Date(Date.now() + delayMinutes * 60 * 1000).toISOString();
 }
 
 // ─── Main Handler ─────────────────────────────────────────────────────────────
@@ -440,13 +442,15 @@ serve(async (req) => {
 
       try {
         // Resolve appointment token for manage links
+        // Use 'booking' token type (as defined in appointment_tokens table)
         let appointmentToken = "";
         if (notification.appointment_id) {
           const { data: tokenRow } = await supabase
             .from("appointment_tokens")
             .select("token")
             .eq("appointment_id", notification.appointment_id)
-            .eq("token_type", "management")
+            .eq("token_type", "booking")
+            .eq("token_status", "active")
             .limit(1)
             .maybeSingle();
           appointmentToken = tokenRow?.token || "";

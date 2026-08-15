@@ -45,9 +45,12 @@ class AppointmentModel extends AppointmentEntity {
     return switch (status) {
       'confirmed' => AppointmentStatusEntity.confirmed,
       'checked_in' => AppointmentStatusEntity.checkedIn,
+      'in_progress' => AppointmentStatusEntity.inProgress,
       'completed' => AppointmentStatusEntity.completed,
       'cancelled' => AppointmentStatusEntity.cancelled,
       'no_show' => AppointmentStatusEntity.noShow,
+      'rescheduled' => AppointmentStatusEntity.rescheduled,
+      'waitlisted' => AppointmentStatusEntity.waitlisted,
       _ => AppointmentStatusEntity.pending,
     };
   }
@@ -57,9 +60,12 @@ class AppointmentModel extends AppointmentEntity {
       AppointmentStatusEntity.pending => 'pending',
       AppointmentStatusEntity.confirmed => 'confirmed',
       AppointmentStatusEntity.checkedIn => 'checked_in',
+      AppointmentStatusEntity.inProgress => 'in_progress',
       AppointmentStatusEntity.completed => 'completed',
       AppointmentStatusEntity.cancelled => 'cancelled',
       AppointmentStatusEntity.noShow => 'no_show',
+      AppointmentStatusEntity.rescheduled => 'rescheduled',
+      AppointmentStatusEntity.waitlisted => 'waitlisted',
     };
   }
 

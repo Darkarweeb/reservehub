@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../features/onboarding/domain/entities/onboarding_entities.dart';
 import '../../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../../localization/app_strings.dart';
 import './ob_step_wrapper.dart';
 
 /// Step 3: Branch setup.
@@ -58,7 +59,7 @@ class _ObStepBranchWidgetState extends State<ObStepBranchWidget> {
       // Pre-fill from business
       final biz = provider.business;
       if (biz != null) {
-        _nameCtrl.text = '${biz.name} - Main Branch';
+        _nameCtrl.text = '${biz.name} - ${AppStrings.mainBranch}';
         _timezone = biz.timezone ?? 'UTC';
       }
     }
@@ -110,31 +111,30 @@ class _ObStepBranchWidgetState extends State<ObStepBranchWidget> {
     return Form(
       key: _formKey,
       child: ObStepWrapper(
-        title: 'Your First Location',
-        subtitle:
-            'Add your primary branch. You can add more locations from the dashboard later.',
+        title: AppStrings.obStepTitleBranch,
+        subtitle: AppStrings.obStepSubtitleBranch,
         isLoading: provider.isLoading,
         onBack: () => provider.goToStep(OnboardingStep.business),
         onNext: _onNext,
         child: Column(
           children: [
             ObSectionCard(
-              title: 'Branch Details',
+              title: AppStrings.obBranchDetails,
               child: Column(
                 children: [
                   ObTextField(
-                    label: 'Branch Name',
-                    hint: 'e.g. Main Branch, Downtown Location',
+                    label: AppStrings.obBranchNameLabel,
+                    hint: AppStrings.obBranchNameHint,
                     controller: _nameCtrl,
                     required: true,
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Branch name is required'
+                        ? AppStrings.obBranchNameRequired
                         : null,
                   ),
                   const SizedBox(height: 16),
                   ObTextField(
-                    label: 'Street Address',
-                    hint: '123 Main Street',
+                    label: AppStrings.obStreetAddress,
+                    hint: AppStrings.obStreetAddressHint,
                     controller: _addressCtrl,
                   ),
                   const SizedBox(height: 16),
@@ -142,16 +142,16 @@ class _ObStepBranchWidgetState extends State<ObStepBranchWidget> {
                     children: [
                       Expanded(
                         child: ObTextField(
-                          label: 'City',
-                          hint: 'New York',
+                          label: AppStrings.city,
+                          hint: AppStrings.obCityHint,
                           controller: _cityCtrl,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: ObTextField(
-                          label: 'Country',
-                          hint: 'United States',
+                          label: AppStrings.country,
+                          hint: AppStrings.obCountryHint,
                           controller: _countryCtrl,
                         ),
                       ),
@@ -162,25 +162,25 @@ class _ObStepBranchWidgetState extends State<ObStepBranchWidget> {
             ),
             const SizedBox(height: 16),
             ObSectionCard(
-              title: 'Contact & Timezone',
+              title: AppStrings.obContactAndTimezone,
               child: Column(
                 children: [
                   ObTextField(
-                    label: 'Branch Phone',
-                    hint: '+1 555 000 0000',
+                    label: AppStrings.branchPhone,
+                    hint: AppStrings.obBranchPhoneHint,
                     controller: _phoneCtrl,
                     keyboardType: TextInputType.phone,
                   ),
                   const SizedBox(height: 16),
                   ObTextField(
-                    label: 'Branch Email',
-                    hint: 'branch@yourbusiness.com',
+                    label: AppStrings.email,
+                    hint: AppStrings.obBranchEmailHint,
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 16),
                   _DropdownField(
-                    label: 'Branch Timezone',
+                    label: AppStrings.obBranchTimezone,
                     value: _timezone,
                     items: _timezones,
                     onChanged: (v) => setState(() => _timezone = v!),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 
 class ServiceFilterWidget extends StatelessWidget {
@@ -12,18 +13,19 @@ class ServiceFilterWidget extends StatelessWidget {
     super.key,
   });
 
-  static const List<String> _filters = [
-    'All',
-    'Haircut',
+  static List<String> get filters => [
+    AppStrings.filterAll,
+    'Corte',
     'Color',
-    'Nails',
-    'Massage',
+    'Uñas',
+    'Masaje',
     'Facial',
-    'Waxing',
+    'Depilación',
   ];
 
   @override
   Widget build(BuildContext context) {
+    final filterList = filters;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
       child: Column(
@@ -32,7 +34,7 @@ class ServiceFilterWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: Text(
-              'Services',
+              AppStrings.servicesFilterLabel,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
@@ -45,10 +47,10 @@ class ServiceFilterWidget extends StatelessWidget {
             height: 38,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: _filters.length,
+              itemCount: filterList.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, i) {
-                final filter = _filters[i];
+                final filter = filterList[i];
                 final isActive = filter == selected;
                 return GestureDetector(
                   onTap: () => onSelected(filter),

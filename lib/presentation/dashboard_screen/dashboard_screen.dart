@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../localization/app_strings.dart';
 import '../../navigation/route_names.dart';
 import '../../shared/utils/responsive_builder.dart';
 import '../../theme/app_theme.dart';
@@ -21,7 +22,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = false;
-  String _selectedFilter = 'All';
+  String _selectedFilter = AppStrings.filterAll;
 
   Future<void> _onRefresh() async {
     setState(() => _isLoading = true);
@@ -48,7 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
         label: Text(
-          'New Appointment',
+          AppStrings.nuevaCita,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w600,

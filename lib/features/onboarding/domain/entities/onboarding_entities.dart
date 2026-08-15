@@ -17,42 +17,45 @@ extension OnboardingStepX on OnboardingStep {
   String get title {
     switch (this) {
       case OnboardingStep.organization:
-        return 'Organization';
+        return 'Organización';
       case OnboardingStep.business:
-        return 'Business';
+        return 'Negocio';
       case OnboardingStep.branch:
-        return 'Branch';
+        return 'Sucursal';
       case OnboardingStep.services:
-        return 'Services';
+        return 'Servicios';
       case OnboardingStep.employees:
-        return 'Employees';
+        return 'Profesionales';
       case OnboardingStep.businessHours:
-        return 'Business Hours';
+        return 'Horario';
       case OnboardingStep.bookingSettings:
-        return 'Booking Settings';
+        return 'Configuración de Reservas';
       case OnboardingStep.review:
-        return 'Review & Publish';
+        return 'Revisar y Publicar';
     }
   }
+
+  /// Alias used by the sidebar for localized display.
+  String get localizedTitle => title;
 
   String get subtitle {
     switch (this) {
       case OnboardingStep.organization:
-        return 'Tell us about your organization';
+        return 'Cuéntanos sobre tu organización';
       case OnboardingStep.business:
-        return 'Set up your business profile';
+        return 'Configura el perfil de tu negocio';
       case OnboardingStep.branch:
-        return 'Add your first location';
+        return 'Agrega tu primera ubicación';
       case OnboardingStep.services:
-        return 'Define what you offer';
+        return 'Define lo que ofreces';
       case OnboardingStep.employees:
-        return 'Add your team members';
+        return 'Agrega a los miembros de tu equipo';
       case OnboardingStep.businessHours:
-        return 'Set your operating hours';
+        return 'Establece tu horario de atención';
       case OnboardingStep.bookingSettings:
-        return 'Configure booking rules';
+        return 'Configura las reglas de reserva';
       case OnboardingStep.review:
-        return 'Review and publish your business';
+        return 'Revisa y publica tu negocio';
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../features/onboarding/domain/entities/onboarding_entities.dart';
 import '../../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 import './ob_step_wrapper.dart';
 
@@ -101,7 +102,7 @@ class _ObStepBusinessWidgetState extends State<ObStepBusinessWidget> {
     if (mounted) {
       setState(() {
         _checkingSlug = false;
-        _slugError = available ? null : 'This URL is already taken';
+        _slugError = available ? null : AppStrings.obSlugTaken;
       });
     }
   }
@@ -141,25 +142,24 @@ class _ObStepBusinessWidgetState extends State<ObStepBusinessWidget> {
     return Form(
       key: _formKey,
       child: ObStepWrapper(
-        title: 'Your Business',
-        subtitle:
-            'Set up your business profile. This is what customers will see.',
+        title: AppStrings.obStepTitleBusiness,
+        subtitle: AppStrings.obStepSubtitleBusiness,
         isLoading: provider.isLoading,
         onBack: () => provider.goToStep(OnboardingStep.organization),
         onNext: _onNext,
         child: Column(
           children: [
             ObSectionCard(
-              title: 'Business Profile',
+              title: AppStrings.obBusinessProfile,
               child: Column(
                 children: [
                   ObTextField(
-                    label: 'Business Name',
-                    hint: 'e.g. Downtown Salon, City Barbershop',
+                    label: AppStrings.obBusinessNameLabel,
+                    hint: AppStrings.obBusinessNameHint,
                     controller: _nameCtrl,
                     required: true,
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Business name is required'
+                        ? AppStrings.obBusinessNameRequired
                         : null,
                   ),
                   const SizedBox(height: 16),
@@ -168,7 +168,7 @@ class _ObStepBusinessWidgetState extends State<ObStepBusinessWidget> {
                     children: [
                       RichText(
                         text: TextSpan(
-                          text: 'Public URL Slug',
+                          text: AppStrings.obPublicUrlSlug,
                           style: Theme.of(context).textTheme.labelMedium
                               ?.copyWith(
                                 color: const Color(0xFF374151),
@@ -189,16 +189,16 @@ class _ObStepBusinessWidgetState extends State<ObStepBusinessWidget> {
                         onChanged: (_) => setState(() => _slugError = null),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
-                            return 'Slug is required';
+                            return AppStrings.obSlugRequired;
                           }
                           if (!RegExp(r'^[a-z0-9-]+$').hasMatch(v.trim())) {
-                            return 'Only lowercase letters, numbers, and hyphens';
+                            return AppStrings.obSlugInvalidChars;
                           }
                           if (_slugError != null) return _slugError;
                           return null;
                         },
                         decoration: InputDecoration(
-                          hintText: 'your-business-name',
+                          hintText: AppStrings.obPublicUrlSlugHint,
                           prefixText: 'reservehub.com/b/',
                           prefixStyle: const TextStyle(
                             color: Color(0xFF94A3B8),
@@ -227,7 +227,7 @@ class _ObStepBusinessWidgetState extends State<ObStepBusinessWidget> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'This is your unique public booking URL',
+                        AppStrings.obSlugHelperText,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: const Color(0xFF94A3B8),
                         ),
@@ -236,8 +236,8 @@ class _ObStepBusinessWidgetState extends State<ObStepBusinessWidget> {
                   ),
                   const SizedBox(height: 16),
                   ObTextField(
-                    label: 'Description',
-                    hint: 'Tell customers what makes your business special...',
+                    label: AppStrings.businessDescription,
+                    hint: AppStrings.obDescriptionHint,
                     controller: _descCtrl,
                     maxLines: 3,
                   ),
@@ -246,33 +246,33 @@ class _ObStepBusinessWidgetState extends State<ObStepBusinessWidget> {
             ),
             const SizedBox(height: 16),
             ObSectionCard(
-              title: 'Contact Information',
+              title: AppStrings.obContactInformation,
               child: Column(
                 children: [
                   ObTextField(
-                    label: 'Business Phone',
-                    hint: '+1 555 000 0000',
+                    label: AppStrings.businessPhone,
+                    hint: AppStrings.obBusinessPhoneHint,
                     controller: _phoneCtrl,
                     keyboardType: TextInputType.phone,
                   ),
                   const SizedBox(height: 16),
                   ObTextField(
-                    label: 'Business Email',
-                    hint: 'hello@yourbusiness.com',
+                    label: AppStrings.businessEmail,
+                    hint: AppStrings.obBusinessEmailHint,
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return null;
                       if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(v.trim())) {
-                        return 'Enter a valid email address';
+                        return AppStrings.invalidEmail;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
                   ObTextField(
-                    label: 'Website',
-                    hint: 'https://yourbusiness.com',
+                    label: AppStrings.obWebsite,
+                    hint: AppStrings.obWebsiteHint,
                     controller: _websiteCtrl,
                     keyboardType: TextInputType.url,
                   ),
@@ -281,9 +281,9 @@ class _ObStepBusinessWidgetState extends State<ObStepBusinessWidget> {
             ),
             const SizedBox(height: 16),
             ObSectionCard(
-              title: 'Regional Settings',
+              title: AppStrings.obRegionalSettings,
               child: _DropdownField(
-                label: 'Business Timezone',
+                label: AppStrings.obBusinessTimezone,
                 value: _timezone,
                 items: _timezones,
                 onChanged: (v) => setState(() => _timezone = v!),

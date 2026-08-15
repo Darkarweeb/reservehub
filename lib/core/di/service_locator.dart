@@ -20,6 +20,8 @@ import '../../features/scheduling/data/repositories/time_block_repository_impl.d
 import '../../features/scheduling/domain/repositories/appointment_repository.dart';
 import '../../features/scheduling/domain/repositories/availability_repository.dart';
 import '../../features/scheduling/domain/repositories/time_block_repository.dart';
+import '../../features/appointments/data/repositories/appointment_lifecycle_repository_impl.dart';
+import '../../features/appointments/domain/repositories/appointment_lifecycle_repository.dart';
 
 /// Dependency Injection registry for ReserveHub.
 ///
@@ -71,6 +73,11 @@ class ServiceLocator {
 
     register<TimeBlockRepository>(
       TimeBlockRepositoryImpl(client: supabaseClient),
+    );
+
+    // ─── Appointment Lifecycle ───────────────────────────────────────────────
+    register<AppointmentLifecycleRepository>(
+      AppointmentLifecycleRepositoryImpl(client: supabaseClient),
     );
 
     // ─── Public Discovery & Booking ─────────────────────────────────────────

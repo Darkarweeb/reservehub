@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 
 /// Shared wrapper for all onboarding step content.
@@ -22,7 +23,7 @@ class ObStepWrapper extends StatelessWidget {
     required this.child,
     this.onBack,
     this.onNext,
-    this.nextLabel = 'Continue',
+    this.nextLabel = '',
     this.isLoading = false,
     this.canGoNext = true,
     this.extraAction,
@@ -30,6 +31,9 @@ class ObStepWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedNextLabel = nextLabel.isEmpty
+        ? AppStrings.continue_
+        : nextLabel;
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 700;
@@ -75,7 +79,7 @@ class ObStepWrapper extends StatelessWidget {
                         OutlinedButton.icon(
                           onPressed: isLoading ? null : onBack,
                           icon: const Icon(Icons.arrow_back, size: 16),
-                          label: const Text('Back'),
+                          label: Text(AppStrings.back),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.primary,
                             side: const BorderSide(
@@ -122,7 +126,7 @@ class ObStepWrapper extends StatelessWidget {
                               : Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(nextLabel),
+                                    Text(resolvedNextLabel),
                                     const SizedBox(width: 8),
                                     const Icon(Icons.arrow_forward, size: 16),
                                   ],

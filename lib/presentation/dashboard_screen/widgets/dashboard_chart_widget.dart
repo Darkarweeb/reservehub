@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 
 class DashboardChartWidget extends StatefulWidget {
@@ -11,9 +12,13 @@ class DashboardChartWidget extends StatefulWidget {
 }
 
 class _DashboardChartWidgetState extends State<DashboardChartWidget> {
-  // TODO: Replace with Riverpod AnalyticsNotifier for production
   int _selectedRange = 0; // 0=7d, 1=30d, 2=90d
-  final List<String> _ranges = ['7 days', '30 days', '90 days'];
+
+  List<String> get _ranges => [
+    AppStrings.chartRange7d,
+    AppStrings.chartRange30d,
+    AppStrings.chartRange90d,
+  ];
 
   // Mock revenue data — realistic variance with dip on Wednesday
   final List<FlSpot> _revenueData7d = const [
@@ -26,19 +31,18 @@ class _DashboardChartWidgetState extends State<DashboardChartWidget> {
     FlSpot(6, 1840),
   ];
 
-  final List<String> _dayLabels7d = [
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun',
+  List<String> get _dayLabels7d => [
+    AppStrings.weekdayShortMon,
+    AppStrings.weekdayShortTue,
+    AppStrings.weekdayShortWed,
+    AppStrings.weekdayShortThu,
+    AppStrings.weekdayShortFri,
+    AppStrings.weekdayShortSat,
+    AppStrings.weekdayShortSun,
   ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Container(
@@ -64,7 +68,7 @@ class _DashboardChartWidgetState extends State<DashboardChartWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Revenue Trend',
+                      AppStrings.revenueTrend,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -73,7 +77,7 @@ class _DashboardChartWidgetState extends State<DashboardChartWidget> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Last updated just now',
+                      AppStrings.lastUpdatedJustNow,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         color: const Color(0xFF94A3B8),
@@ -157,11 +161,12 @@ class _DashboardChartWidgetState extends State<DashboardChartWidget> {
                         reservedSize: 24,
                         getTitlesWidget: (v, _) {
                           final i = v.toInt();
-                          if (i < 0 || i >= _dayLabels7d.length) {
+                          final labels = _dayLabels7d;
+                          if (i < 0 || i >= labels.length) {
                             return const SizedBox.shrink();
                           }
                           return Text(
-                            _dayLabels7d[i],
+                            labels[i],
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 10,
                               color: const Color(0xFF94A3B8),

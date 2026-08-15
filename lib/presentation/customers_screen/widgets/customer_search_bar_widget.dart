@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 
 class CustomerSearchBarWidget extends StatefulWidget {
@@ -49,7 +50,7 @@ class _CustomerSearchBarWidgetState extends State<CustomerSearchBarWidget> {
           fontWeight: FontWeight.w500,
         ),
         decoration: InputDecoration(
-          hintText: 'Search customers...',
+          hintText: AppStrings.searchCustomers,
           hintStyle: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             color: const Color(0xFF94A3B8),

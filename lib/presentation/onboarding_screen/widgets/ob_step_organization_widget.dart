@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../features/onboarding/domain/entities/onboarding_entities.dart';
 import '../../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../../localization/app_strings.dart';
 import './ob_step_wrapper.dart';
 
 /// Step 1: Organization setup.
@@ -113,44 +114,43 @@ class _ObStepOrganizationWidgetState extends State<ObStepOrganizationWidget> {
     return Form(
       key: _formKey,
       child: ObStepWrapper(
-        title: 'Your Organization',
-        subtitle:
-            'An organization is the top-level account that can contain multiple businesses.',
+        title: AppStrings.obStepTitleOrganization,
+        subtitle: AppStrings.obStepSubtitleOrganization,
         isLoading: provider.isLoading,
         onNext: _onNext,
         child: Column(
           children: [
             ObSectionCard(
-              title: 'Organization Details',
+              title: AppStrings.obOrganizationDetails,
               child: Column(
                 children: [
                   ObTextField(
-                    label: 'Organization Name',
-                    hint: 'e.g. Acme Corp, Smith Family Businesses',
+                    label: AppStrings.obOrganizationNameLabel,
+                    hint: AppStrings.obOrganizationNameHint,
                     controller: _nameCtrl,
                     required: true,
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Organization name is required'
+                        ? AppStrings.obOrganizationNameRequired
                         : null,
                   ),
                   const SizedBox(height: 16),
                   ObTextField(
-                    label: 'Contact Email',
-                    hint: 'admin@yourcompany.com',
+                    label: AppStrings.obContactEmail,
+                    hint: AppStrings.obContactEmailHint,
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return null;
                       if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(v.trim())) {
-                        return 'Enter a valid email address';
+                        return AppStrings.invalidEmail;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
                   ObTextField(
-                    label: 'Phone',
-                    hint: '+1 555 000 0000',
+                    label: AppStrings.phone,
+                    hint: AppStrings.obBusinessPhoneHint,
                     controller: _phoneCtrl,
                     keyboardType: TextInputType.phone,
                   ),
@@ -159,18 +159,18 @@ class _ObStepOrganizationWidgetState extends State<ObStepOrganizationWidget> {
             ),
             const SizedBox(height: 16),
             ObSectionCard(
-              title: 'Regional Settings',
+              title: AppStrings.obRegionalSettings,
               child: Column(
                 children: [
                   _DropdownField(
-                    label: 'Default Timezone',
+                    label: AppStrings.obDefaultTimezone,
                     value: _timezone,
                     items: _timezones,
                     onChanged: (v) => setState(() => _timezone = v!),
                   ),
                   const SizedBox(height: 16),
                   _DropdownField(
-                    label: 'Currency',
+                    label: AppStrings.currency,
                     value: _currency,
                     items: _currencies,
                     onChanged: (v) => setState(() => _currency = v!),

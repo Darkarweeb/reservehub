@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../features/onboarding/domain/entities/onboarding_entities.dart';
 import '../../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../../localization/app_strings.dart';
 import '../../../navigation/route_names.dart';
 import '../../../theme/app_theme.dart';
 import './ob_step_wrapper.dart';
@@ -63,7 +64,7 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Business Published!',
+              AppStrings.obBusinessPublishedTitle,
               style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
                 color: AppTheme.primary,
                 fontWeight: FontWeight.w700,
@@ -71,7 +72,7 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Your business is now live and publicly discoverable. Customers can start booking appointments.',
+              AppStrings.obBusinessPublishedSubtitle,
               style: Theme.of(
                 ctx,
               ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF64748B)),
@@ -81,7 +82,6 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
             FilledButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                // Navigate to dashboard
                 if (context.mounted) {
                   context.go(RouteNames.dashboard);
                 }
@@ -90,7 +90,7 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
                 backgroundColor: AppTheme.secondary,
                 minimumSize: const Size(double.infinity, 48),
               ),
-              child: const Text('Go to Dashboard'),
+              child: Text(AppStrings.goToDashboard),
             ),
           ],
         ),
@@ -107,12 +107,12 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
     final isPublished = biz?.isPublished ?? false;
 
     return ObStepWrapper(
-      title: 'Review & Publish',
-      subtitle: 'Review your setup before making your business live.',
+      title: AppStrings.obStepTitleReview,
+      subtitle: AppStrings.obStepSubtitleReview,
       isLoading: provider.isLoading,
       onBack: () => provider.goToStep(OnboardingStep.bookingSettings),
       onNext: isPublished ? null : _publish,
-      nextLabel: 'Publish Business',
+      nextLabel: AppStrings.obPublishBusiness,
       canGoNext: !_publishing,
       child: Column(
         children: [
@@ -138,12 +138,12 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Business is Live',
+                          AppStrings.obBusinessIsLive,
                           style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(color: AppTheme.success),
                         ),
                         Text(
-                          'Your business is publicly discoverable',
+                          AppStrings.obBusinessIsLiveSubtitle,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: AppTheme.success),
                         ),
@@ -171,7 +171,7 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Your business is in draft mode. Publish to make it publicly bookable.',
+                      AppStrings.obDraftMode,
                       style: Theme.of(
                         context,
                       ).textTheme.bodySmall?.copyWith(color: AppTheme.warning),
@@ -185,14 +185,17 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
           // Organization
           if (org != null)
             _ReviewSection(
-              title: 'Organization',
+              title: AppStrings.obReviewOrganization,
               icon: Icons.business_outlined,
               onEdit: () => provider.goToStep(OnboardingStep.organization),
               children: [
-                _ReviewRow('Name', org.name),
-                if (org.email != null) _ReviewRow('Email', org.email!),
-                if (org.timezone != null) _ReviewRow('Timezone', org.timezone!),
-                if (org.currency != null) _ReviewRow('Currency', org.currency!),
+                _ReviewRow(AppStrings.obReviewName, org.name),
+                if (org.email != null)
+                  _ReviewRow(AppStrings.obReviewEmail, org.email!),
+                if (org.timezone != null)
+                  _ReviewRow(AppStrings.obReviewTimezone, org.timezone!),
+                if (org.currency != null)
+                  _ReviewRow(AppStrings.obReviewCurrency, org.currency!),
               ],
             ),
           const SizedBox(height: 12),
@@ -200,16 +203,22 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
           // Business
           if (biz != null)
             _ReviewSection(
-              title: 'Business',
+              title: AppStrings.obReviewBusiness,
               icon: Icons.store_outlined,
               onEdit: () => provider.goToStep(OnboardingStep.business),
               children: [
-                _ReviewRow('Name', biz.name),
+                _ReviewRow(AppStrings.obReviewName, biz.name),
                 if (biz.slug != null)
-                  _ReviewRow('URL', 'reservehub.com/b/${biz.slug}'),
-                if (biz.email != null) _ReviewRow('Email', biz.email!),
-                if (biz.phone != null) _ReviewRow('Phone', biz.phone!),
-                if (biz.timezone != null) _ReviewRow('Timezone', biz.timezone!),
+                  _ReviewRow(
+                    AppStrings.obReviewUrl,
+                    'reservehub.com/b/${biz.slug}',
+                  ),
+                if (biz.email != null)
+                  _ReviewRow(AppStrings.obReviewEmail, biz.email!),
+                if (biz.phone != null)
+                  _ReviewRow(AppStrings.obReviewPhone, biz.phone!),
+                if (biz.timezone != null)
+                  _ReviewRow(AppStrings.obReviewTimezone, biz.timezone!),
               ],
             ),
           const SizedBox(height: 12),
@@ -217,30 +226,31 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
           // Branch
           if (branch != null)
             _ReviewSection(
-              title: 'Branch',
+              title: AppStrings.obReviewBranch,
               icon: Icons.location_on_outlined,
               onEdit: () => provider.goToStep(OnboardingStep.branch),
               children: [
-                _ReviewRow('Name', branch.name),
+                _ReviewRow(AppStrings.obReviewName, branch.name),
                 if (branch.address != null)
-                  _ReviewRow('Address', branch.address!),
-                if (branch.city != null) _ReviewRow('City', branch.city!),
+                  _ReviewRow(AppStrings.obReviewAddress, branch.address!),
+                if (branch.city != null)
+                  _ReviewRow(AppStrings.obReviewCity, branch.city!),
                 if (branch.country != null)
-                  _ReviewRow('Country', branch.country!),
+                  _ReviewRow(AppStrings.obReviewCountry, branch.country!),
               ],
             ),
           const SizedBox(height: 12),
 
           // Services
           _ReviewSection(
-            title: 'Services',
+            title: AppStrings.obReviewServices,
             icon: Icons.spa_outlined,
             onEdit: () => provider.goToStep(OnboardingStep.services),
             children: provider.services.isEmpty
                 ? [
                     _ReviewRow(
-                      'Status',
-                      'No services added yet',
+                      AppStrings.obReviewStatus,
+                      AppStrings.obReviewNoServicesYet,
                       isWarning: true,
                     ),
                   ]
@@ -257,14 +267,14 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
 
           // Employees
           _ReviewSection(
-            title: 'Employees',
+            title: AppStrings.obReviewEmployees,
             icon: Icons.people_outline,
             onEdit: () => provider.goToStep(OnboardingStep.employees),
             children: provider.employees.isEmpty
                 ? [
                     _ReviewRow(
-                      'Status',
-                      'No employees added yet',
+                      AppStrings.obReviewStatus,
+                      AppStrings.obReviewNoEmployeesYet,
                       isWarning: true,
                     ),
                   ]
@@ -272,7 +282,7 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
                       .map(
                         (e) => _ReviewRow(
                           e.displayName,
-                          '${e.serviceIds.length} service(s) assigned',
+                          '${e.serviceIds.length} ${AppStrings.obServicesAssigned}',
                         ),
                       )
                       .toList(),
@@ -281,65 +291,44 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
 
           // Business Hours
           _ReviewSection(
-            title: 'Business Hours',
+            title: AppStrings.obReviewHours,
             icon: Icons.access_time_outlined,
             onEdit: () => provider.goToStep(OnboardingStep.businessHours),
-            children:
-                provider.businessHours
-                    .where((d) => d.isOpen)
-                    .map(
-                      (d) => _ReviewRow(
-                        d.dayName.substring(0, 3),
-                        '${d.openTime} – ${d.closeTime}',
-                      ),
-                    )
-                    .toList()
-                  ..addAll(
-                    provider.businessHours
-                        .where((d) => !d.isOpen)
-                        .map(
-                          (d) => _ReviewRow(
-                            d.dayName.substring(0, 3),
-                            'Closed',
-                            isSecondary: true,
-                          ),
-                        )
-                        .toList(),
-                  ),
+            children: _buildHoursRows(provider.businessHours),
           ),
           const SizedBox(height: 12),
 
           // Booking Settings
           _ReviewSection(
-            title: 'Booking Settings',
+            title: AppStrings.obReviewBookingSettings,
             icon: Icons.settings_outlined,
             onEdit: () => provider.goToStep(OnboardingStep.bookingSettings),
             children: [
               _ReviewRow(
-                'Online Booking',
+                AppStrings.obReviewOnlineBooking,
                 provider.bookingSettings.onlineBookingEnabled
-                    ? 'Enabled'
-                    : 'Disabled',
+                    ? AppStrings.obReviewEnabled
+                    : AppStrings.obReviewDisabled,
               ),
               _ReviewRow(
-                'Confirmation',
+                AppStrings.obReviewConfirmation,
                 provider.bookingSettings.autoConfirm
-                    ? 'Auto-confirm'
-                    : 'Manual approval',
+                    ? AppStrings.obReviewAutoConfirm
+                    : AppStrings.obReviewManualApproval,
               ),
               _ReviewRow(
-                'Min Notice',
-                '${provider.bookingSettings.minAdvanceBookingHours} hours',
+                AppStrings.obReviewMinNotice,
+                '${provider.bookingSettings.minAdvanceBookingHours} ${AppStrings.obUnitHours}',
               ),
               _ReviewRow(
-                'Max Horizon',
-                '${provider.bookingSettings.maxAdvanceBookingDays} days',
+                AppStrings.obReviewMaxHorizon,
+                '${provider.bookingSettings.maxAdvanceBookingDays} ${AppStrings.obUnitDays}',
               ),
               _ReviewRow(
-                'Cancellations',
+                AppStrings.obReviewCancellations,
                 provider.bookingSettings.cancellationEnabled
-                    ? 'Allowed'
-                    : 'Not allowed',
+                    ? AppStrings.obReviewAllowed
+                    : AppStrings.obReviewNotAllowed,
               ),
             ],
           ),
@@ -367,7 +356,7 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Ready to go live?',
+                    AppStrings.obReadyToGoLive,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: AppTheme.primary,
                       fontWeight: FontWeight.w700,
@@ -375,7 +364,7 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Publishing will make your business publicly discoverable and allow customers to book appointments.',
+                    AppStrings.obReadyToGoLiveSubtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: const Color(0xFF64748B),
                     ),
@@ -388,6 +377,40 @@ class _ObStepReviewWidgetState extends State<ObStepReviewWidget> {
         ],
       ),
     );
+  }
+
+  List<Widget> _buildHoursRows(List<OnboardingDayHours> hours) {
+    const dayNames = [
+      AppStrings.daySunday,
+      AppStrings.dayMonday,
+      AppStrings.dayTuesday,
+      AppStrings.dayWednesday,
+      AppStrings.dayThursday,
+      AppStrings.dayFriday,
+      AppStrings.daySaturday,
+    ];
+
+    String abbr(int dow) {
+      final name = dayNames[dow % 7];
+      return name.length >= 3 ? name.substring(0, 3) : name;
+    }
+
+    final openDays = hours
+        .where((d) => d.isOpen)
+        .map(
+          (d) =>
+              _ReviewRow(abbr(d.dayOfWeek), '${d.openTime} – ${d.closeTime}'),
+        );
+    final closedDays = hours
+        .where((d) => !d.isOpen)
+        .map(
+          (d) => _ReviewRow(
+            abbr(d.dayOfWeek),
+            AppStrings.closed,
+            isSecondary: true,
+          ),
+        );
+    return [...openDays, ...closedDays];
   }
 }
 
@@ -431,7 +454,7 @@ class _ReviewSection extends StatelessWidget {
                 TextButton.icon(
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit_outlined, size: 14),
-                  label: const Text('Edit'),
+                  label: Text(AppStrings.edit),
                   style: TextButton.styleFrom(
                     foregroundColor: AppTheme.secondary,
                     padding: const EdgeInsets.symmetric(

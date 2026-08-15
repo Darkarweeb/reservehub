@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../features/onboarding/domain/entities/onboarding_entities.dart';
 import '../../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 import './ob_step_wrapper.dart';
 
@@ -19,20 +20,21 @@ class _ObStepEmployeesWidgetState extends State<ObStepEmployeesWidget> {
   Widget build(BuildContext context) {
     final provider = context.watch<OnboardingProvider>();
     return ObStepWrapper(
-      title: 'Your Team',
-      subtitle:
-          'Add employees who will provide services. You can manage your team from the dashboard later.',
+      title: AppStrings.obStepTitleEmployees,
+      subtitle: AppStrings.obStepSubtitleEmployees,
       isLoading: provider.isLoading,
       onBack: () => provider.goToStep(OnboardingStep.services),
       onNext: () {
         provider.markEmployeesComplete();
         provider.completeStep(OnboardingStep.employees);
       },
-      nextLabel: provider.employees.isEmpty ? 'Skip for now' : 'Continue',
+      nextLabel: provider.employees.isEmpty
+          ? AppStrings.skipForNow
+          : AppStrings.continue_,
       extraAction: TextButton.icon(
         onPressed: () => _showEmployeeDialog(context, null),
         icon: const Icon(Icons.person_add_outlined, size: 16),
-        label: const Text('Add Employee'),
+        label: Text(AppStrings.obAddEmployee),
         style: TextButton.styleFrom(foregroundColor: AppTheme.secondary),
       ),
       child: Column(
@@ -103,14 +105,14 @@ class _EmptyEmployeesCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'No employees yet',
+            AppStrings.obNoEmployeesYet,
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(color: AppTheme.primary),
           ),
           const SizedBox(height: 8),
           Text(
-            'Add team members who will provide services to customers',
+            AppStrings.obNoEmployeesSubtitle,
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF64748B)),
@@ -120,7 +122,7 @@ class _EmptyEmployeesCard extends StatelessWidget {
           FilledButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.person_add_outlined, size: 16),
-            label: const Text('Add Your First Employee'),
+            label: Text(AppStrings.obAddFirstEmployee),
             style: FilledButton.styleFrom(backgroundColor: AppTheme.secondary),
           ),
         ],
@@ -198,7 +200,7 @@ class _EmployeeCard extends StatelessWidget {
                   )
                 else
                   Text(
-                    'No services assigned',
+                    AppStrings.obNoServicesAssigned,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: const Color(0xFF94A3B8),
                     ),
@@ -215,7 +217,7 @@ class _EmployeeCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              employee.isActive ? 'Active' : 'Inactive',
+              employee.isActive ? AppStrings.active : AppStrings.inactive,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: employee.isActive
                     ? AppTheme.success
@@ -322,8 +324,8 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                   children: [
                     Text(
                       widget.existing == null
-                          ? 'Add Employee'
-                          : 'Edit Employee',
+                          ? AppStrings.obAddEmployeeTitle
+                          : AppStrings.obEditEmployeeTitle,
                       style: Theme.of(
                         context,
                       ).textTheme.titleLarge?.copyWith(color: AppTheme.primary),
@@ -340,45 +342,47 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                   children: [
                     Expanded(
                       child: ObTextField(
-                        label: 'First Name',
-                        hint: 'Jane',
+                        label: AppStrings.obFirstName,
+                        hint: AppStrings.obFirstNameHint,
                         controller: _firstNameCtrl,
                         required: true,
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Required' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? AppStrings.obFieldRequired
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: ObTextField(
-                        label: 'Last Name',
-                        hint: 'Smith',
+                        label: AppStrings.obLastName,
+                        hint: AppStrings.obLastNameHint,
                         controller: _lastNameCtrl,
                         required: true,
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Required' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? AppStrings.obFieldRequired
+                            : null,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 ObTextField(
-                  label: 'Email',
-                  hint: 'jane@yourbusiness.com',
+                  label: AppStrings.email,
+                  hint: AppStrings.obEmployeeEmailHint,
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return null;
                     if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(v.trim())) {
-                      return 'Enter a valid email';
+                      return AppStrings.obInvalidEmail;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 ObTextField(
-                  label: 'Phone',
-                  hint: '+1 555 000 0000',
+                  label: AppStrings.phone,
+                  hint: AppStrings.obEmployeePhoneHint,
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
                 ),
@@ -387,7 +391,7 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                   children: [
                     Expanded(
                       child: _ToggleRow(
-                        label: 'Active',
+                        label: AppStrings.active,
                         value: _isActive,
                         onChanged: (v) => setState(() => _isActive = v),
                       ),
@@ -395,7 +399,7 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: _ToggleRow(
-                        label: 'Bookable',
+                        label: AppStrings.obBookable,
                         value: _isBookable,
                         onChanged: (v) => setState(() => _isBookable = v),
                       ),
@@ -405,7 +409,7 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                 if (widget.services.isNotEmpty) ...[
                   const SizedBox(height: 20),
                   Text(
-                    'Assigned Services',
+                    AppStrings.obAssignedServices,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: const Color(0xFF374151),
                       fontWeight: FontWeight.w600,
@@ -441,7 +445,7 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
+                      child: Text(AppStrings.cancel),
                     ),
                     const SizedBox(width: 12),
                     FilledButton(
@@ -458,7 +462,7 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Save Employee'),
+                          : Text(AppStrings.obSaveEmployee),
                     ),
                   ],
                 ),

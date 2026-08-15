@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_export.dart';
+import '../../../localization/app_strings.dart';
 import '../../../widgets/status_badge_widget.dart';
 
 class TodaysAppointmentsWidget extends StatelessWidget {
@@ -90,7 +91,7 @@ class TodaysAppointmentsWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Today's Schedule",
+                AppStrings.horarioDeHoy,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
@@ -107,7 +108,7 @@ class TodaysAppointmentsWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  '${_appointments.length} total',
+                  '${_appointments.length} ${AppStrings.totalLabel}',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

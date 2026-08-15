@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../features/onboarding/domain/entities/onboarding_entities.dart';
 import '../../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 import './ob_step_wrapper.dart';
 
@@ -20,20 +21,21 @@ class _ObStepServicesWidgetState extends State<ObStepServicesWidget> {
   Widget build(BuildContext context) {
     final provider = context.watch<OnboardingProvider>();
     return ObStepWrapper(
-      title: 'Your Services',
-      subtitle:
-          'Add the services your business offers. You can edit these later.',
+      title: AppStrings.obStepTitleServices,
+      subtitle: AppStrings.obStepSubtitleServices,
       isLoading: provider.isLoading,
       onBack: () => provider.goToStep(OnboardingStep.branch),
       onNext: () {
         provider.markServicesComplete();
         provider.completeStep(OnboardingStep.services);
       },
-      nextLabel: provider.services.isEmpty ? 'Skip for now' : 'Continue',
+      nextLabel: provider.services.isEmpty
+          ? AppStrings.skipForNow
+          : AppStrings.continue_,
       extraAction: TextButton.icon(
         onPressed: () => _showServiceDialog(context, null),
         icon: const Icon(Icons.add, size: 16),
-        label: const Text('Add Service'),
+        label: Text(AppStrings.obAddService),
         style: TextButton.styleFrom(foregroundColor: AppTheme.secondary),
       ),
       child: Column(
@@ -79,17 +81,17 @@ class _ObStepServicesWidgetState extends State<ObStepServicesWidget> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Service'),
-        content: Text('Remove "${svc.name}"?'),
+        title: Text(AppStrings.obDeleteServiceTitle),
+        content: Text('${AppStrings.remove} "${svc.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppStrings.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: AppTheme.error),
-            child: const Text('Delete'),
+            child: Text(AppStrings.delete),
           ),
         ],
       ),
@@ -133,14 +135,14 @@ class _EmptyServicesCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'No services yet',
+            AppStrings.obNoServicesYet,
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(color: AppTheme.primary),
           ),
           const SizedBox(height: 8),
           Text(
-            'Add the services you offer to customers',
+            AppStrings.obNoServicesSubtitle,
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF64748B)),
@@ -150,7 +152,7 @@ class _EmptyServicesCard extends StatelessWidget {
           FilledButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.add, size: 16),
-            label: const Text('Add Your First Service'),
+            label: Text(AppStrings.obAddFirstService),
             style: FilledButton.styleFrom(backgroundColor: AppTheme.secondary),
           ),
         ],
@@ -225,7 +227,9 @@ class _ServiceCard extends StatelessWidget {
                       icon: service.isActive
                           ? Icons.check_circle_outline
                           : Icons.cancel_outlined,
-                      label: service.isActive ? 'Active' : 'Inactive',
+                      label: service.isActive
+                          ? AppStrings.active
+                          : AppStrings.inactive,
                       color: service.isActive
                           ? AppTheme.success
                           : const Color(0xFF94A3B8),
@@ -358,7 +362,9 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                 Row(
                   children: [
                     Text(
-                      widget.existing == null ? 'Add Service' : 'Edit Service',
+                      widget.existing == null
+                          ? AppStrings.obAddServiceTitle
+                          : AppStrings.obEditServiceTitle,
                       style: Theme.of(
                         context,
                       ).textTheme.titleLarge?.copyWith(color: AppTheme.primary),
@@ -372,18 +378,18 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                 ),
                 const SizedBox(height: 20),
                 ObTextField(
-                  label: 'Service Name',
-                  hint: 'e.g. Haircut, Massage, Consultation',
+                  label: AppStrings.obServiceNameLabel,
+                  hint: AppStrings.obServiceNameHint,
                   controller: _nameCtrl,
                   required: true,
                   validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Service name is required'
+                      ? AppStrings.obServiceNameRequired
                       : null,
                 ),
                 const SizedBox(height: 16),
                 ObTextField(
-                  label: 'Description',
-                  hint: 'Brief description of this service...',
+                  label: AppStrings.serviceDescription,
+                  hint: AppStrings.obServiceDescriptionHint,
                   controller: _descCtrl,
                   maxLines: 2,
                 ),
@@ -392,12 +398,14 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                   children: [
                     Expanded(
                       child: _NumField(
-                        label: 'Duration (min)',
+                        label: AppStrings.obDurationMin,
                         controller: _durationCtrl,
                         required: true,
                         validator: (v) {
                           final n = int.tryParse(v ?? '');
-                          if (n == null || n <= 0) return 'Must be > 0';
+                          if (n == null || n <= 0) {
+                            return AppStrings.obMustBeGreaterThanZero;
+                          }
                           return null;
                         },
                       ),
@@ -405,11 +413,13 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _NumField(
-                        label: 'Buffer Before (min)',
+                        label: AppStrings.obBufferBefore,
                         controller: _bufferBeforeCtrl,
                         validator: (v) {
                           final n = int.tryParse(v ?? '');
-                          if (n == null || n < 0) return 'Must be ≥ 0';
+                          if (n == null || n < 0) {
+                            return AppStrings.obMustBeZeroOrMore;
+                          }
                           return null;
                         },
                       ),
@@ -417,11 +427,13 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _NumField(
-                        label: 'Buffer After (min)',
+                        label: AppStrings.obBufferAfter,
                         controller: _bufferAfterCtrl,
                         validator: (v) {
                           final n = int.tryParse(v ?? '');
-                          if (n == null || n < 0) return 'Must be ≥ 0';
+                          if (n == null || n < 0) {
+                            return AppStrings.obMustBeZeroOrMore;
+                          }
                           return null;
                         },
                       ),
@@ -433,7 +445,7 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                   children: [
                     Expanded(
                       child: ObTextField(
-                        label: 'Display Price',
+                        label: AppStrings.obDisplayPrice,
                         hint: '0.00',
                         controller: _priceCtrl,
                         keyboardType: const TextInputType.numberWithOptions(
@@ -447,7 +459,7 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Status',
+                            AppStrings.obStatus,
                             style: Theme.of(context).textTheme.labelMedium
                                 ?.copyWith(
                                   color: const Color(0xFF374151),
@@ -463,7 +475,9 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                _isActive ? 'Active' : 'Inactive',
+                                _isActive
+                                    ? AppStrings.active
+                                    : AppStrings.inactive,
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ],
@@ -479,7 +493,7 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
+                      child: Text(AppStrings.cancel),
                     ),
                     const SizedBox(width: 12),
                     FilledButton(
@@ -496,7 +510,7 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Save Service'),
+                          : Text(AppStrings.obSaveService),
                     ),
                   ],
                 ),

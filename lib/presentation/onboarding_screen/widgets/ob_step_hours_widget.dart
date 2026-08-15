@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../features/onboarding/domain/entities/onboarding_entities.dart';
 import '../../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 import './ob_step_wrapper.dart';
 
@@ -35,14 +36,13 @@ class _ObStepHoursWidgetState extends State<ObStepHoursWidget> {
   Widget build(BuildContext context) {
     final provider = context.watch<OnboardingProvider>();
     return ObStepWrapper(
-      title: 'Business Hours',
-      subtitle:
-          'Set when your business is open. These hours affect public availability.',
+      title: AppStrings.obStepTitleHours,
+      subtitle: AppStrings.obStepSubtitleHours,
       isLoading: provider.isLoading,
       onBack: () => provider.goToStep(OnboardingStep.employees),
       onNext: _onNext,
       child: ObSectionCard(
-        title: 'Weekly Schedule',
+        title: AppStrings.obWeeklySchedule,
         child: Column(
           children: provider.businessHours.map((day) {
             return _DayHoursRow(
@@ -54,6 +54,21 @@ class _ObStepHoursWidgetState extends State<ObStepHoursWidget> {
       ),
     );
   }
+}
+
+/// Returns the localized Spanish day abbreviation (3 chars) for a given day index.
+String _localizedDayAbbr(int dayOfWeek) {
+  const dayNames = [
+    AppStrings.daySunday,
+    AppStrings.dayMonday,
+    AppStrings.dayTuesday,
+    AppStrings.dayWednesday,
+    AppStrings.dayThursday,
+    AppStrings.dayFriday,
+    AppStrings.daySaturday,
+  ];
+  final name = dayNames[dayOfWeek % 7];
+  return name.length >= 3 ? name.substring(0, 3) : name;
 }
 
 class _DayHoursRow extends StatelessWidget {
@@ -140,7 +155,7 @@ class _DayHoursRow extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    day.dayName.substring(0, 3),
+                    _localizedDayAbbr(day.dayOfWeek),
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: day.isOpen
                           ? AppTheme.primary
@@ -185,7 +200,7 @@ class _DayHoursRow extends StatelessWidget {
                 height: 48,
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Closed',
+                  AppStrings.closed,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: const Color(0xFF94A3B8),
                   ),

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../../features/management/presentation/providers/management_provider.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 
 class DashboardKpiWidget extends StatefulWidget {
@@ -42,7 +43,7 @@ class _DashboardKpiWidgetState extends State<DashboardKpiWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Today's Overview",
+                          AppStrings.resumen,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
@@ -105,11 +106,11 @@ class _DashboardKpiWidgetState extends State<DashboardKpiWidget> {
 
     final kpiList = [
       _KpiData(
-        label: "Today's Appts",
+        label: AppStrings.kpiTodayAppts,
         value: '$todayCount',
         change: todayDelta >= 0
-            ? '+$todayDelta vs yesterday'
-            : '$todayDelta vs yesterday',
+            ? '+$todayDelta ${AppStrings.kpiVsYesterday}'
+            : '$todayDelta ${AppStrings.kpiVsYesterday}',
         isPositive: todayDelta >= 0,
         isAlert: false,
         icon: Icons.calendar_today_rounded,
@@ -117,9 +118,9 @@ class _DashboardKpiWidgetState extends State<DashboardKpiWidget> {
         bgColor: AppTheme.secondaryContainer,
       ),
       _KpiData(
-        label: 'Appt Value',
+        label: AppStrings.kpiApptValue,
         value: '\$${appointmentValue.toStringAsFixed(0)}',
-        change: 'Informational only',
+        change: AppStrings.kpiInformationalOnly,
         isPositive: true,
         isAlert: false,
         icon: Icons.attach_money_rounded,
@@ -127,9 +128,9 @@ class _DashboardKpiWidgetState extends State<DashboardKpiWidget> {
         bgColor: AppTheme.successContainer,
       ),
       _KpiData(
-        label: 'Cancelled',
+        label: AppStrings.kpiCancelled,
         value: '$cancelledCount',
-        change: cancelledCount > 0 ? 'Today' : 'None today',
+        change: cancelledCount > 0 ? AppStrings.today : AppStrings.kpiNoneToday,
         isPositive: cancelledCount == 0,
         isAlert: cancelledCount > 2,
         icon: Icons.person_off_outlined,
@@ -137,9 +138,9 @@ class _DashboardKpiWidgetState extends State<DashboardKpiWidget> {
         bgColor: AppTheme.errorContainer,
       ),
       _KpiData(
-        label: 'Customers',
+        label: AppStrings.kpiCustomers,
         value: '$customerCount',
-        change: '$upcomingCount upcoming',
+        change: '$upcomingCount ${AppStrings.kpiUpcoming}',
         isPositive: true,
         isAlert: false,
         icon: Icons.people_outline_rounded,
@@ -204,7 +205,7 @@ class _DashboardKpiWidgetState extends State<DashboardKpiWidget> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Dashboard data unavailable. Complete onboarding to see live KPIs.',
+              AppStrings.dashboardDataUnavailable,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 color: const Color(0xFF94A3B8),
@@ -219,29 +220,29 @@ class _DashboardKpiWidgetState extends State<DashboardKpiWidget> {
   String _formattedDate() {
     final now = DateTime.now();
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      AppStrings.monthJan,
+      AppStrings.monthFeb,
+      AppStrings.monthMar,
+      AppStrings.monthApr,
+      AppStrings.monthMay,
+      AppStrings.monthJun,
+      AppStrings.monthJul,
+      AppStrings.monthAug,
+      AppStrings.monthSep,
+      AppStrings.monthOct,
+      AppStrings.monthNov,
+      AppStrings.monthDec,
     ];
-    const days = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
+    const weekdays = [
+      AppStrings.weekdayMon,
+      AppStrings.weekdayTue,
+      AppStrings.weekdayWed,
+      AppStrings.weekdayThu,
+      AppStrings.weekdayFri,
+      AppStrings.weekdaySat,
+      AppStrings.weekdaySun,
     ];
-    return '${days[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}, ${now.year}';
+    return '${weekdays[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}, ${now.year}';
   }
 }
 
@@ -316,7 +317,7 @@ class _KpiCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    'Alert',
+                    AppStrings.kpiAlert,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 9,
                       fontWeight: FontWeight.w700,

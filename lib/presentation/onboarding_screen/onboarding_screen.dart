@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../features/onboarding/domain/entities/onboarding_entities.dart';
 import '../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../localization/app_strings.dart';
 import '../../theme/app_theme.dart';
 import './widgets/ob_step_booking_settings_widget.dart';
 import './widgets/ob_step_branch_widget.dart';
@@ -155,14 +156,14 @@ class _OnboardingAppBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'ReserveHub',
+                AppStrings.appName,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppTheme.primary,
                 ),
               ),
               Text(
-                'Business Setup',
+                AppStrings.obBusinessSetupLabel,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: const Color(0xFF64748B)),
@@ -178,7 +179,7 @@ class _OnboardingAppBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              'Step ${step.index + 1} of ${OnboardingStep.values.length}',
+              'Paso ${step.index + 1} ${AppStrings.of} ${OnboardingStep.values.length}',
               style: Theme.of(
                 context,
               ).textTheme.labelMedium?.copyWith(color: AppTheme.secondary),
@@ -279,7 +280,7 @@ class _StepSidebar extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'ReserveHub',
+                      AppStrings.appName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -289,7 +290,7 @@ class _StepSidebar extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Business Setup',
+                  AppStrings.obBusinessSetupLabel,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white.withAlpha(153),
                   ),
@@ -335,7 +336,7 @@ class _StepSidebar extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${(provider.progressPercent * 100).round()}% complete',
+                  '${(provider.progressPercent * 100).round()}${AppStrings.obProgressComplete}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white.withAlpha(179),
                   ),
@@ -405,7 +406,7 @@ class _SidebarStepTile extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                step.title,
+                step.localizedTitle,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: isCurrent
                       ? Colors.white

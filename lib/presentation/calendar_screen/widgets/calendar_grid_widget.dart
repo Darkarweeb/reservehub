@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../features/scheduling/domain/repositories/appointment_repository.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 
 class CalendarGridWidget extends StatelessWidget {
@@ -20,27 +21,28 @@ class CalendarGridWidget extends StatelessWidget {
   });
 
   static const List<String> _weekdays = [
-    'Mo',
-    'Tu',
-    'We',
-    'Th',
-    'Fr',
-    'Sa',
-    'Su',
+    AppStrings.calWeekdayMo,
+    AppStrings.calWeekdayTu,
+    AppStrings.calWeekdayWe,
+    AppStrings.calWeekdayTh,
+    AppStrings.calWeekdayFr,
+    AppStrings.calWeekdaySa,
+    AppStrings.calWeekdaySu,
   ];
+
   static const List<String> _months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    AppStrings.calMonthJanuary,
+    AppStrings.calMonthFebruary,
+    AppStrings.calMonthMarch,
+    AppStrings.calMonthApril,
+    AppStrings.calMonthMay,
+    AppStrings.calMonthJune,
+    AppStrings.calMonthJuly,
+    AppStrings.calMonthAugust,
+    AppStrings.calMonthSeptember,
+    AppStrings.calMonthOctober,
+    AppStrings.calMonthNovember,
+    AppStrings.calMonthDecember,
   ];
 
   bool _hasAppointments(int day) {

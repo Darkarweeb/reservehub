@@ -185,9 +185,12 @@ AppointmentStatusEntity _parseStatus(String s) {
   return switch (s) {
     'confirmed' => AppointmentStatusEntity.confirmed,
     'checked_in' => AppointmentStatusEntity.checkedIn,
+    'in_progress' => AppointmentStatusEntity.inProgress,
     'completed' => AppointmentStatusEntity.completed,
     'cancelled' => AppointmentStatusEntity.cancelled,
     'no_show' => AppointmentStatusEntity.noShow,
+    'rescheduled' => AppointmentStatusEntity.rescheduled,
+    'waitlisted' => AppointmentStatusEntity.waitlisted,
     _ => AppointmentStatusEntity.pending,
   };
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../features/onboarding/domain/entities/onboarding_entities.dart';
 import '../../../features/onboarding/presentation/providers/onboarding_provider.dart';
+import '../../../localization/app_strings.dart';
 import '../../../theme/app_theme.dart';
 import './ob_step_wrapper.dart';
 
@@ -51,46 +52,45 @@ class _ObStepBookingSettingsWidgetState
   Widget build(BuildContext context) {
     final provider = context.watch<OnboardingProvider>();
     return ObStepWrapper(
-      title: 'Booking Settings',
-      subtitle:
-          'Configure how customers can book appointments. These settings can be changed later.',
+      title: AppStrings.obStepTitleBookingSettings,
+      subtitle: AppStrings.obStepSubtitleBookingSettings,
       isLoading: provider.isLoading,
       onBack: () => provider.goToStep(OnboardingStep.businessHours),
       onNext: _onNext,
       child: Column(
         children: [
-          // Online Booking
+          // Reservas en línea
           ObSectionCard(
-            title: 'Online Booking',
+            title: AppStrings.obOnlineBookingSection,
             child: Column(
               children: [
                 _ToggleRow(
-                  label: 'Enable Online Booking',
-                  subtitle: 'Allow customers to book appointments online',
+                  label: AppStrings.obEnableOnlineBooking,
+                  subtitle: AppStrings.obEnableOnlineBookingSubtitle,
                   value: _settings.onlineBookingEnabled,
                   onChanged: (v) =>
                       _update(_settings.copyWith(onlineBookingEnabled: v)),
                 ),
                 const Divider(height: 24),
                 _ToggleRow(
-                  label: 'Allow Guest Booking',
-                  subtitle: 'Customers can book without creating an account',
+                  label: AppStrings.obAllowGuestBooking,
+                  subtitle: AppStrings.obAllowGuestBookingSubtitle,
                   value: _settings.allowGuestBooking,
                   onChanged: (v) =>
                       _update(_settings.copyWith(allowGuestBooking: v)),
                 ),
                 const Divider(height: 24),
                 _ToggleRow(
-                  label: 'Show Employee Selection',
-                  subtitle: 'Let customers choose their preferred employee',
+                  label: AppStrings.obShowEmployeeSelection,
+                  subtitle: AppStrings.obShowEmployeeSelectionSubtitle,
                   value: _settings.showEmployeeSelection,
                   onChanged: (v) =>
                       _update(_settings.copyWith(showEmployeeSelection: v)),
                 ),
                 const Divider(height: 24),
                 _ToggleRow(
-                  label: 'Show Service Prices',
-                  subtitle: 'Display service prices on the booking page',
+                  label: AppStrings.obShowServicePrices,
+                  subtitle: AppStrings.obShowServicePricesSubtitle,
                   value: _settings.showPrice,
                   onChanged: (v) => _update(_settings.copyWith(showPrice: v)),
                 ),
@@ -99,29 +99,28 @@ class _ObStepBookingSettingsWidgetState
           ),
           const SizedBox(height: 16),
 
-          // Confirmation
+          // Confirmación
           ObSectionCard(
-            title: 'Confirmation',
+            title: AppStrings.obConfirmationSection,
             child: _ToggleRow(
-              label: 'Auto-Confirm Bookings',
-              subtitle:
-                  'Appointments are confirmed immediately. Disable to require manual approval.',
+              label: AppStrings.obAutoConfirm,
+              subtitle: AppStrings.obAutoConfirmSubtitle,
               value: _settings.autoConfirm,
               onChanged: (v) => _update(_settings.copyWith(autoConfirm: v)),
             ),
           ),
           const SizedBox(height: 16),
 
-          // Lead time
+          // Ventana de reservas
           ObSectionCard(
-            title: 'Booking Window',
+            title: AppStrings.obBookingWindowSection,
             child: Column(
               children: [
                 _NumberRow(
-                  label: 'Minimum Notice',
-                  subtitle: 'Minimum hours before an appointment can be booked',
+                  label: AppStrings.obMinimumNotice,
+                  subtitle: AppStrings.obMinimumNoticeSubtitle,
                   value: _settings.minAdvanceBookingHours,
-                  unit: 'hours',
+                  unit: AppStrings.obUnitHours,
                   min: 0,
                   max: 168,
                   onChanged: (v) =>
@@ -129,10 +128,10 @@ class _ObStepBookingSettingsWidgetState
                 ),
                 const Divider(height: 24),
                 _NumberRow(
-                  label: 'Maximum Horizon',
-                  subtitle: 'How far in advance customers can book',
+                  label: AppStrings.obMaximumHorizon,
+                  subtitle: AppStrings.obMaximumHorizonSubtitle,
                   value: _settings.maxAdvanceBookingDays,
-                  unit: 'days',
+                  unit: AppStrings.obUnitDays,
                   min: 1,
                   max: 365,
                   onChanged: (v) =>
@@ -143,14 +142,14 @@ class _ObStepBookingSettingsWidgetState
           ),
           const SizedBox(height: 16),
 
-          // Cancellation
+          // Política de cancelación
           ObSectionCard(
-            title: 'Cancellation Policy',
+            title: AppStrings.obCancellationPolicySection,
             child: Column(
               children: [
                 _ToggleRow(
-                  label: 'Allow Cancellations',
-                  subtitle: 'Customers can cancel their appointments',
+                  label: AppStrings.obAllowCancellations,
+                  subtitle: AppStrings.obAllowCancellationsSubtitle,
                   value: _settings.cancellationEnabled,
                   onChanged: (v) =>
                       _update(_settings.copyWith(cancellationEnabled: v)),
@@ -158,11 +157,10 @@ class _ObStepBookingSettingsWidgetState
                 if (_settings.cancellationEnabled) ...[
                   const Divider(height: 24),
                   _NumberRow(
-                    label: 'Cancellation Notice',
-                    subtitle:
-                        'Minimum hours before appointment to allow cancellation',
+                    label: AppStrings.obCancellationNotice,
+                    subtitle: AppStrings.obCancellationNoticeSubtitle,
                     value: _settings.minCancellationNoticeHours,
-                    unit: 'hours',
+                    unit: AppStrings.obUnitHours,
                     min: 0,
                     max: 168,
                     onChanged: (v) => _update(
@@ -171,8 +169,8 @@ class _ObStepBookingSettingsWidgetState
                   ),
                   const Divider(height: 24),
                   _ToggleRow(
-                    label: 'Allow Rescheduling',
-                    subtitle: 'Customers can reschedule their appointments',
+                    label: AppStrings.obAllowRescheduling,
+                    subtitle: AppStrings.obAllowReschedulingSubtitle,
                     value: _settings.reschedulingEnabled,
                     onChanged: (v) =>
                         _update(_settings.copyWith(reschedulingEnabled: v)),

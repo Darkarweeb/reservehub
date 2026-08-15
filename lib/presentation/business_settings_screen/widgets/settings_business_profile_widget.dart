@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/app_export.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../features/management/presentation/providers/management_provider.dart';
+import '../../../localization/app_strings.dart';
 
 class SettingsBusinessProfileWidget extends StatefulWidget {
   const SettingsBusinessProfileWidget({super.key});
@@ -123,14 +124,14 @@ class _SettingsBusinessProfileWidgetState
     setState(() => _saving = false);
     result.fold(
       onSuccess: (_) => ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Business profile updated'),
+        SnackBar(
+          content: Text(AppStrings.settingsBizProfileUpdated),
           backgroundColor: AppTheme.success,
         ),
       ),
       onFailure: (f) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(f.message ?? 'Failed to save'),
+          content: Text(f.message ?? AppStrings.settingsBizProfileSaveFailed),
           backgroundColor: AppTheme.error,
         ),
       ),
@@ -140,12 +141,12 @@ class _SettingsBusinessProfileWidgetState
   @override
   Widget build(BuildContext context) {
     return _SettingsSectionWrapper(
-      title: 'Business Profile',
+      title: AppStrings.settingsBizProfileTitle,
       icon: Icons.business_outlined,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildFieldLabel('Business Name'),
+          _buildFieldLabel(AppStrings.settingsBizNameLabel),
           const SizedBox(height: 6),
           TextFormField(
             controller: _nameCtrl,
@@ -158,7 +159,7 @@ class _SettingsBusinessProfileWidgetState
             ),
           ),
           const SizedBox(height: 12),
-          _buildFieldLabel('Description'),
+          _buildFieldLabel(AppStrings.settingsBizDescriptionLabel),
           const SizedBox(height: 6),
           TextFormField(
             controller: _bioCtrl,
@@ -167,8 +168,8 @@ class _SettingsBusinessProfileWidgetState
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
-            decoration: const InputDecoration(
-              hintText: 'Describe your business...',
+            decoration: InputDecoration(
+              hintText: AppStrings.settingsBizDescriptionHint,
             ),
           ),
           const SizedBox(height: 12),
@@ -178,7 +179,7 @@ class _SettingsBusinessProfileWidgetState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildFieldLabel('Phone'),
+                    _buildFieldLabel(AppStrings.settingsBizPhoneLabel),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _phoneCtrl,
@@ -199,7 +200,7 @@ class _SettingsBusinessProfileWidgetState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildFieldLabel('Email'),
+                    _buildFieldLabel(AppStrings.settingsBizEmailLabel),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _emailCtrl,
@@ -218,7 +219,7 @@ class _SettingsBusinessProfileWidgetState
             ],
           ),
           const SizedBox(height: 12),
-          _buildFieldLabel('Website'),
+          _buildFieldLabel(AppStrings.settingsBizWebsiteLabel),
           const SizedBox(height: 6),
           TextFormField(
             controller: _websiteCtrl,
@@ -239,7 +240,7 @@ class _SettingsBusinessProfileWidgetState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildFieldLabel('Address'),
+                    _buildFieldLabel(AppStrings.settingsBizAddressLabel),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _addressCtrl,
@@ -259,7 +260,7 @@ class _SettingsBusinessProfileWidgetState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildFieldLabel('City'),
+                    _buildFieldLabel(AppStrings.settingsBizCityLabel),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _cityCtrl,
@@ -286,7 +287,7 @@ class _SettingsBusinessProfileWidgetState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildFieldLabel('Country'),
+                    _buildFieldLabel(AppStrings.settingsBizCountryLabel),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _countryCtrl,
@@ -306,7 +307,7 @@ class _SettingsBusinessProfileWidgetState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildFieldLabel('Timezone'),
+                    _buildFieldLabel(AppStrings.settingsBizTimezoneLabel),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedTimezone,
@@ -373,7 +374,7 @@ class _SettingsBusinessProfileWidgetState
                         color: Colors.white,
                       ),
                     )
-                  : const Text('Save Business Profile'),
+                  : Text(AppStrings.settingsBizSaveButton),
             ),
           ),
         ],

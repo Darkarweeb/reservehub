@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../features/management/domain/entities/management_entities.dart';
 import '../../../features/management/presentation/providers/management_provider.dart';
+import '../../../localization/app_strings.dart';
 import '../../../shared/utils/responsive_builder.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bar_widget.dart';
@@ -28,61 +29,65 @@ class BusinessSettingsScreen extends StatefulWidget {
 class _BusinessSettingsScreenState extends State<BusinessSettingsScreen> {
   int _selectedSection = 0;
 
-  static const _sections = [
+  static List<_SectionSpec> get _sections => [
     _SectionSpec(
       icon: Icons.store_outlined,
-      label: 'Business Profile',
+      label: AppStrings.settingsSectionBusinessProfile,
       index: 0,
     ),
-    _SectionSpec(icon: Icons.location_on_outlined, label: 'Branches', index: 1),
+    _SectionSpec(
+      icon: Icons.location_on_outlined,
+      label: AppStrings.settingsSectionBranches,
+      index: 1,
+    ),
     _SectionSpec(
       icon: Icons.design_services_outlined,
-      label: 'Services',
+      label: AppStrings.settingsSectionServices,
       index: 2,
     ),
     _SectionSpec(
       icon: Icons.people_outline_rounded,
-      label: 'Employees',
+      label: AppStrings.settingsSectionEmployees,
       index: 3,
     ),
     _SectionSpec(
       icon: Icons.schedule_outlined,
-      label: 'Business Hours',
+      label: AppStrings.settingsSectionBusinessHours,
       index: 4,
     ),
     _SectionSpec(
       icon: Icons.tune_outlined,
-      label: 'Booking Settings',
+      label: AppStrings.settingsSectionBookingSettings,
       index: 5,
     ),
     _SectionSpec(
       icon: Icons.event_busy_outlined,
-      label: 'Holidays & Exceptions',
+      label: AppStrings.settingsSectionHolidaysExceptions,
       index: 6,
     ),
     _SectionSpec(
       icon: Icons.notifications_outlined,
-      label: 'Notifications',
+      label: AppStrings.settingsSectionNotifications,
       index: 7,
     ),
     _SectionSpec(
       icon: Icons.workspace_premium_outlined,
-      label: 'Subscription',
+      label: AppStrings.settingsSectionSubscription,
       index: 8,
     ),
     _SectionSpec(
       icon: Icons.palette_outlined,
-      label: 'Branding & Appearance',
+      label: AppStrings.settingsSectionBranding,
       index: 9,
     ),
     _SectionSpec(
       icon: Icons.workspace_premium_outlined,
-      label: 'Subscription',
+      label: AppStrings.settingsSectionSubscription,
       index: 10,
     ),
     _SectionSpec(
       icon: Icons.warning_amber_outlined,
-      label: 'Danger Zone',
+      label: AppStrings.settingsSectionDangerZone,
       index: 11,
     ),
   ];
@@ -120,7 +125,7 @@ class _BusinessSettingsScreenState extends State<BusinessSettingsScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
                   child: Text(
-                    'Settings',
+                    AppStrings.settingsSidebarTitle,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -169,7 +174,7 @@ class _BusinessSettingsScreenState extends State<BusinessSettingsScreen> {
             DrawerHeader(
               decoration: const BoxDecoration(color: AppTheme.primary),
               child: Text(
-                'Settings',
+                AppStrings.settingsSidebarTitle,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -344,7 +349,7 @@ class _BranchManagerSectionState extends State<_BranchManagerSection> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Branch Manager',
+                          AppStrings.settingsBranchManagerTitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -352,7 +357,7 @@ class _BranchManagerSectionState extends State<_BranchManagerSection> {
                           ),
                         ),
                         Text(
-                          'Manage your business locations',
+                          AppStrings.settingsBranchManagerSubtitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             color: const Color(0xFF64748B),
@@ -364,7 +369,7 @@ class _BranchManagerSectionState extends State<_BranchManagerSection> {
                   FilledButton.icon(
                     onPressed: () => _showBranchDialog(context, provider),
                     icon: const Icon(Icons.add, size: 16),
-                    label: const Text('Add Branch'),
+                    label: Text(AppStrings.settingsAddBranch),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppTheme.secondary,
                     ),
@@ -377,8 +382,8 @@ class _BranchManagerSectionState extends State<_BranchManagerSection> {
               else if (provider.branches.isEmpty)
                 _EmptyState(
                   icon: Icons.location_on_outlined,
-                  title: 'No branches yet',
-                  subtitle: 'Add your first branch to get started',
+                  title: AppStrings.settingsNoBranchesTitle,
+                  subtitle: AppStrings.settingsNoBranchesSubtitle,
                 )
               else
                 ...provider.branches.map(
@@ -420,15 +425,15 @@ class _BranchManagerSectionState extends State<_BranchManagerSection> {
             onSuccess: (_) {
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Branch saved'),
+                SnackBar(
+                  content: Text(AppStrings.settingsBranchSaved),
                   backgroundColor: AppTheme.success,
                 ),
               );
             },
             onFailure: (f) => ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(f.message ?? 'Failed'),
+                content: Text(f.message ?? AppStrings.settingsBranchSaveFailed),
                 backgroundColor: AppTheme.error,
               ),
             ),
@@ -481,7 +486,7 @@ class _ServicesManagerSectionState extends State<_ServicesManagerSection> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Services Manager',
+                          AppStrings.settingsServicesManagerTitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -489,7 +494,7 @@ class _ServicesManagerSectionState extends State<_ServicesManagerSection> {
                           ),
                         ),
                         Text(
-                          'Configure services offered by your business',
+                          AppStrings.settingsServicesManagerSubtitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             color: const Color(0xFF64748B),
@@ -501,7 +506,7 @@ class _ServicesManagerSectionState extends State<_ServicesManagerSection> {
                   FilledButton.icon(
                     onPressed: () => _showServiceDialog(context, provider),
                     icon: const Icon(Icons.add, size: 16),
-                    label: const Text('Add Service'),
+                    label: Text(AppStrings.settingsAddService),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppTheme.secondary,
                     ),
@@ -514,9 +519,8 @@ class _ServicesManagerSectionState extends State<_ServicesManagerSection> {
               else if (provider.services.isEmpty)
                 _EmptyState(
                   icon: Icons.design_services_outlined,
-                  title: 'No services yet',
-                  subtitle:
-                      'Add your first service to start accepting bookings',
+                  title: AppStrings.settingsNoServicesTitle,
+                  subtitle: AppStrings.settingsNoServicesSubtitle,
                 )
               else
                 ...provider.services.map(
@@ -559,15 +563,17 @@ class _ServicesManagerSectionState extends State<_ServicesManagerSection> {
             onSuccess: (_) {
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Service saved'),
+                SnackBar(
+                  content: Text(AppStrings.settingsServiceSaved),
                   backgroundColor: AppTheme.success,
                 ),
               );
             },
             onFailure: (f) => ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(f.message ?? 'Failed'),
+                content: Text(
+                  f.message ?? AppStrings.settingsServiceSaveFailed,
+                ),
                 backgroundColor: AppTheme.error,
               ),
             ),
@@ -615,7 +621,7 @@ class _EmployeesManagerSectionState extends State<_EmployeesManagerSection> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Employee Manager',
+                          AppStrings.settingsEmployeesManagerTitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -623,7 +629,7 @@ class _EmployeesManagerSectionState extends State<_EmployeesManagerSection> {
                           ),
                         ),
                         Text(
-                          'Manage staff, schedules, breaks and time off',
+                          AppStrings.settingsEmployeesManagerSubtitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             color: const Color(0xFF64748B),
@@ -635,7 +641,7 @@ class _EmployeesManagerSectionState extends State<_EmployeesManagerSection> {
                   FilledButton.icon(
                     onPressed: () => _showEmployeeDialog(context, provider),
                     icon: const Icon(Icons.add, size: 16),
-                    label: const Text('Add Employee'),
+                    label: Text(AppStrings.settingsAddEmployee),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppTheme.secondary,
                     ),
@@ -648,8 +654,8 @@ class _EmployeesManagerSectionState extends State<_EmployeesManagerSection> {
               else if (provider.employees.isEmpty)
                 _EmptyState(
                   icon: Icons.people_outline_rounded,
-                  title: 'No employees yet',
-                  subtitle: 'Add employees to assign services and schedules',
+                  title: AppStrings.settingsNoEmployeesTitle,
+                  subtitle: AppStrings.settingsNoEmployeesSubtitle,
                 )
               else
                 ...provider.employees.map(
@@ -707,15 +713,17 @@ class _EmployeesManagerSectionState extends State<_EmployeesManagerSection> {
             onSuccess: (_) {
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Employee saved'),
+                SnackBar(
+                  content: Text(AppStrings.settingsEmployeeSaved),
                   backgroundColor: AppTheme.success,
                 ),
               );
             },
             onFailure: (f) => ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(f.message ?? 'Failed'),
+                content: Text(
+                  f.message ?? AppStrings.settingsEmployeeSaveFailed,
+                ),
                 backgroundColor: AppTheme.error,
               ),
             ),
@@ -754,7 +762,7 @@ class _BusinessHoursSectionState extends State<_BusinessHoursSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Business Hours',
+                AppStrings.settingsBusinessHoursTitle,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -762,7 +770,7 @@ class _BusinessHoursSectionState extends State<_BusinessHoursSection> {
                 ),
               ),
               Text(
-                'Set when your business is open for appointments',
+                AppStrings.settingsBusinessHoursSubtitle,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   color: const Color(0xFF64748B),
@@ -783,15 +791,19 @@ class _BusinessHoursSectionState extends State<_BusinessHoursSection> {
                     result.fold(
                       onSuccess: (_) =>
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Business hours saved'),
+                            SnackBar(
+                              content: Text(
+                                AppStrings.settingsBusinessHoursSaved,
+                              ),
                               backgroundColor: AppTheme.success,
                             ),
                           ),
                       onFailure: (f) =>
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(f.message ?? 'Failed'),
+                              content: Text(
+                                f.message ?? AppStrings.dialogFailed,
+                              ),
                               backgroundColor: AppTheme.error,
                             ),
                           ),
@@ -836,7 +848,7 @@ class _BookingSettingsSectionState extends State<_BookingSettingsSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Booking Settings',
+                AppStrings.settingsBookingTitle,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -844,7 +856,7 @@ class _BookingSettingsSectionState extends State<_BookingSettingsSection> {
                 ),
               ),
               Text(
-                'Control how customers can book appointments',
+                AppStrings.settingsBookingSubtitle,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   color: const Color(0xFF64748B),
@@ -861,15 +873,19 @@ class _BookingSettingsSectionState extends State<_BookingSettingsSection> {
                     result.fold(
                       onSuccess: (_) =>
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Booking settings saved'),
+                            SnackBar(
+                              content: Text(
+                                AppStrings.settingsBookingSettingsSaved,
+                              ),
                               backgroundColor: AppTheme.success,
                             ),
                           ),
                       onFailure: (f) =>
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(f.message ?? 'Failed'),
+                              content: Text(
+                                f.message ?? AppStrings.dialogFailed,
+                              ),
                               backgroundColor: AppTheme.error,
                             ),
                           ),
@@ -921,7 +937,7 @@ class _ScheduleExceptionsSectionState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Holidays & Exceptions',
+                          AppStrings.settingsHolidaysTitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -929,7 +945,7 @@ class _ScheduleExceptionsSectionState
                           ),
                         ),
                         Text(
-                          'Override hours for specific dates without changing your regular schedule',
+                          AppStrings.settingsHolidaysSubtitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             color: const Color(0xFF64748B),
@@ -941,7 +957,7 @@ class _ScheduleExceptionsSectionState
                   FilledButton.icon(
                     onPressed: () => _showExceptionDialog(context, provider),
                     icon: const Icon(Icons.add, size: 16),
-                    label: const Text('Add Exception'),
+                    label: Text(AppStrings.settingsAddException),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppTheme.secondary,
                     ),
@@ -954,8 +970,8 @@ class _ScheduleExceptionsSectionState
               else if (provider.scheduleExceptions.isEmpty)
                 _EmptyState(
                   icon: Icons.event_busy_outlined,
-                  title: 'No exceptions configured',
-                  subtitle: 'Add holidays or modified hours for specific dates',
+                  title: AppStrings.settingsNoExceptionsTitle,
+                  subtitle: AppStrings.settingsNoExceptionsSubtitle,
                 )
               else
                 ...provider.scheduleExceptions.map(
@@ -968,15 +984,19 @@ class _ScheduleExceptionsSectionState
                       result.fold(
                         onSuccess: (_) =>
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Exception removed'),
+                              SnackBar(
+                                content: Text(
+                                  AppStrings.settingsExceptionRemoved,
+                                ),
                                 backgroundColor: AppTheme.success,
                               ),
                             ),
                         onFailure: (f) =>
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(f.message ?? 'Failed'),
+                                content: Text(
+                                  f.message ?? AppStrings.dialogFailed,
+                                ),
                                 backgroundColor: AppTheme.error,
                               ),
                             ),
@@ -1008,15 +1028,15 @@ class _ScheduleExceptionsSectionState
             onSuccess: (_) {
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Exception added'),
+                SnackBar(
+                  content: Text(AppStrings.settingsExceptionAdded),
                   backgroundColor: AppTheme.success,
                 ),
               );
             },
             onFailure: (f) => ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(f.message ?? 'Failed'),
+                content: Text(f.message ?? AppStrings.dialogFailed),
                 backgroundColor: AppTheme.error,
               ),
             ),
@@ -1184,7 +1204,7 @@ class _BranchCardState extends State<_BranchCard> {
                             ? AppTheme.secondary
                             : const Color(0xFF64748B),
                       ),
-                      tooltip: 'Branch Image',
+                      tooltip: AppStrings.settingsBranchImageTooltip,
                     ),
                     Switch(
                       value: widget.branch.isActive as bool,
@@ -1207,7 +1227,7 @@ class _BranchCardState extends State<_BranchCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Branch Cover Image',
+                        AppStrings.settingsBranchCoverImage,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -1346,7 +1366,7 @@ class _ServiceCardState extends State<_ServiceCard> {
                             ? AppTheme.secondary
                             : const Color(0xFF64748B),
                       ),
-                      tooltip: 'Service Image',
+                      tooltip: AppStrings.settingsServiceImageTooltip,
                     ),
                     Switch(
                       value: widget.service.isActive as bool,
@@ -1369,7 +1389,7 @@ class _ServiceCardState extends State<_ServiceCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Service Image',
+                        AppStrings.settingsServiceImageLabel,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -1378,7 +1398,7 @@ class _ServiceCardState extends State<_ServiceCard> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Displayed to customers when booking this service',
+                        AppStrings.settingsServiceImageSubtitle,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           color: const Color(0xFF94A3B8),
@@ -1472,8 +1492,8 @@ class _EmployeeExpandableCard extends StatelessWidget {
                         Text(
                           employee.title as String? ??
                               (employee.isBookable as bool
-                                  ? 'Bookable'
-                                  : 'Non-bookable'),
+                                  ? AppStrings.settingsEmployeeBookable
+                                  : AppStrings.inactive),
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             color: const Color(0xFF64748B),
@@ -1563,10 +1583,10 @@ class _EmployeeSchedulePanelState extends State<_EmployeeSchedulePanel>
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
-            tabs: const [
-              Tab(text: 'Working Hours'),
-              Tab(text: 'Breaks'),
-              Tab(text: 'Time Off'),
+            tabs: [
+              Tab(text: AppStrings.settingsTabWorkingHours),
+              Tab(text: AppStrings.settingsTabBreaks),
+              Tab(text: AppStrings.settingsTabTimeOff),
             ],
           ),
           const SizedBox(height: 12),
@@ -1588,15 +1608,19 @@ class _EmployeeSchedulePanelState extends State<_EmployeeSchedulePanel>
                     result.fold(
                       onSuccess: (_) =>
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Working hours saved'),
+                            SnackBar(
+                              content: Text(
+                                AppStrings.settingsWorkingHoursSaved,
+                              ),
                               backgroundColor: AppTheme.success,
                             ),
                           ),
                       onFailure: (f) =>
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(f.message ?? 'Failed'),
+                              content: Text(
+                                f.message ?? AppStrings.dialogFailed,
+                              ),
                               backgroundColor: AppTheme.error,
                             ),
                           ),
@@ -1646,15 +1670,15 @@ class _EmployeeSchedulePanelState extends State<_EmployeeSchedulePanel>
             onSuccess: (_) {
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Break added'),
+                SnackBar(
+                  content: Text(AppStrings.settingsBreakAdded),
                   backgroundColor: AppTheme.success,
                 ),
               );
             },
             onFailure: (f) => ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(f.message ?? 'Failed'),
+                content: Text(f.message ?? AppStrings.dialogFailed),
                 backgroundColor: AppTheme.error,
               ),
             ),
@@ -1684,15 +1708,15 @@ class _EmployeeSchedulePanelState extends State<_EmployeeSchedulePanel>
             onSuccess: (_) {
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Time off added'),
+                SnackBar(
+                  content: Text(AppStrings.settingsTimeOffAdded),
                   backgroundColor: AppTheme.success,
                 ),
               );
             },
             onFailure: (f) => ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(f.message ?? 'Failed'),
+                content: Text(f.message ?? AppStrings.dialogFailed),
                 backgroundColor: AppTheme.error,
               ),
             ),
@@ -1721,7 +1745,7 @@ class _WorkingHoursTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (hours.isEmpty) {
-      return const Center(child: Text('No working hours configured'));
+      return Center(child: Text(AppStrings.settingsNoWorkingHours));
     }
     return Column(
       children: [
@@ -1759,7 +1783,7 @@ class _WorkingHoursTab extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Save Working Hours'),
+                : Text(AppStrings.settingsSaveWorkingHours),
           ),
         ),
       ],
@@ -1789,15 +1813,15 @@ class _BreaksTab extends StatelessWidget {
           child: TextButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.add, size: 16),
-            label: const Text('Add Break'),
+            label: Text(AppStrings.settingsAddBreak),
           ),
         ),
         Expanded(
           child: breaks.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
-                    'No breaks configured',
-                    style: TextStyle(color: Color(0xFF94A3B8)),
+                    AppStrings.settingsNoBreaks,
+                    style: const TextStyle(color: Color(0xFF94A3B8)),
                   ),
                 )
               : ListView.builder(
@@ -1815,7 +1839,7 @@ class _BreaksTab extends StatelessWidget {
                         ),
                       ),
                       subtitle: Text(
-                        '${b.startTime} – ${b.endTime}${b.dayOfWeek != null ? ' (${b.dayOfWeek})' : ' (all days)'}',
+                        '${b.startTime} – ${b.endTime}${b.dayOfWeek != null ? ' (${b.dayOfWeek})' : ' (${AppStrings.settingsAllDays})'}',
                         style: GoogleFonts.plusJakartaSans(fontSize: 11),
                       ),
                       trailing: IconButton(
@@ -1857,15 +1881,15 @@ class _TimeOffTab extends StatelessWidget {
           child: TextButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.add, size: 16),
-            label: const Text('Add Time Off'),
+            label: Text(AppStrings.settingsAddTimeOff),
           ),
         ),
         Expanded(
           child: timeOff.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
-                    'No upcoming time off',
-                    style: TextStyle(color: Color(0xFF94A3B8)),
+                    AppStrings.settingsNoTimeOff,
+                    style: const TextStyle(color: Color(0xFF94A3B8)),
                   ),
                 )
               : ListView.builder(
@@ -1974,7 +1998,7 @@ class _BusinessHoursEditor extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Save Business Hours'),
+                : Text(AppStrings.settingsSaveBusinessHours),
           ),
         ),
       ],
@@ -2227,23 +2251,23 @@ class _BookingSettingsEditorState extends State<_BookingSettingsEditor> {
     return Column(
       children: [
         _SettingsCard(
-          title: 'Online Booking',
+          title: AppStrings.settingsOnlineBookingSection,
           children: [
             _ToggleRow(
-              label: 'Enable public booking',
-              subtitle: 'Allow customers to book online',
+              label: AppStrings.settingsEnablePublicBooking,
+              subtitle: AppStrings.settingsEnablePublicBookingSubtitle,
               value: _onlineBooking,
               onChanged: (v) => setState(() => _onlineBooking = v),
             ),
             _ToggleRow(
-              label: 'Allow guest booking',
-              subtitle: 'Customers can book without an account',
+              label: AppStrings.settingsAllowGuestBooking,
+              subtitle: AppStrings.settingsAllowGuestBookingSubtitle,
               value: _guestBooking,
               onChanged: (v) => setState(() => _guestBooking = v),
             ),
             _ToggleRow(
-              label: 'Auto-confirm bookings',
-              subtitle: 'Automatically confirm new appointments',
+              label: AppStrings.settingsAutoConfirm,
+              subtitle: AppStrings.settingsAutoConfirmSubtitle,
               value: _autoConfirm,
               onChanged: (v) => setState(() => _autoConfirm = v),
             ),
@@ -2251,24 +2275,24 @@ class _BookingSettingsEditorState extends State<_BookingSettingsEditor> {
         ),
         const SizedBox(height: 16),
         _SettingsCard(
-          title: 'Booking Window',
+          title: AppStrings.settingsBookingTitle,
           children: [
             _StepperRow(
-              label: 'Minimum notice (hours)',
+              label: AppStrings.settingsMinNoticeLabel,
               value: _minNotice,
               min: 0,
               max: 72,
               onChanged: (v) => setState(() => _minNotice = v),
             ),
             _StepperRow(
-              label: 'Maximum horizon (days)',
+              label: AppStrings.settingsMaxHorizonLabel,
               value: _maxHorizon,
               min: 1,
               max: 365,
               onChanged: (v) => setState(() => _maxHorizon = v),
             ),
             _StepperRow(
-              label: 'Slot duration (minutes)',
+              label: AppStrings.settingsSlotDurationLabel,
               value: _slotDuration,
               min: 15,
               max: 120,
@@ -2279,23 +2303,23 @@ class _BookingSettingsEditorState extends State<_BookingSettingsEditor> {
         ),
         const SizedBox(height: 16),
         _SettingsCard(
-          title: 'Rescheduling',
+          title: AppStrings.settingsAllowReschedule,
           children: [
             _ToggleRow(
-              label: 'Allow rescheduling',
+              label: AppStrings.settingsAllowReschedule,
               value: _allowReschedule,
               onChanged: (v) => setState(() => _allowReschedule = v),
             ),
             if (_allowReschedule) ...[
               _StepperRow(
-                label: 'Reschedule notice (hours)',
+                label: AppStrings.settingsRescheduleNoticeLabel,
                 value: _rescheduleNotice,
                 min: 0,
                 max: 72,
                 onChanged: (v) => setState(() => _rescheduleNotice = v),
               ),
               _StepperRow(
-                label: 'Max reschedules per booking',
+                label: AppStrings.settingsMaxReschedulesLabel,
                 value: _maxReschedules,
                 min: 1,
                 max: 10,
@@ -2306,16 +2330,16 @@ class _BookingSettingsEditorState extends State<_BookingSettingsEditor> {
         ),
         const SizedBox(height: 16),
         _SettingsCard(
-          title: 'Cancellation Policy',
+          title: AppStrings.settingsCancellationSection,
           children: [
             _ToggleRow(
-              label: 'Allow cancellations',
+              label: AppStrings.settingsAllowCancellations,
               value: _cancellationAllowed,
               onChanged: (v) => setState(() => _cancellationAllowed = v),
             ),
             if (_cancellationAllowed)
               _StepperRow(
-                label: 'Cancellation notice (hours)',
+                label: AppStrings.settingsCancellationNoticeLabel,
                 value: _cancellationNotice,
                 min: 0,
                 max: 72,
@@ -2338,7 +2362,7 @@ class _BookingSettingsEditorState extends State<_BookingSettingsEditor> {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Save Booking Settings'),
+                : Text(AppStrings.settingsSaveBookingSettings),
           ),
         ),
       ],
@@ -2572,7 +2596,7 @@ class _ExceptionCard extends StatelessWidget {
                 ),
                 Text(
                   isClosed
-                      ? 'Closed'
+                      ? AppStrings.settingsExceptionClosedLabel
                       : '${exception.openTime} – ${exception.closeTime}',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
@@ -2653,7 +2677,9 @@ class _BranchDialogState extends State<_BranchDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        widget.branch != null ? 'Edit Branch' : 'Add Branch',
+        widget.branch != null
+            ? AppStrings.settingsBranchDialogEdit
+            : AppStrings.settingsBranchDialogAdd,
         style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
       ),
       content: SizedBox(
@@ -2662,12 +2688,30 @@ class _BranchDialogState extends State<_BranchDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _DialogField(controller: _nameCtrl, label: 'Branch Name *'),
-              _DialogField(controller: _addressCtrl, label: 'Address'),
-              _DialogField(controller: _cityCtrl, label: 'City'),
-              _DialogField(controller: _countryCtrl, label: 'Country'),
-              _DialogField(controller: _phoneCtrl, label: 'Phone'),
-              _DialogField(controller: _emailCtrl, label: 'Email'),
+              _DialogField(
+                controller: _nameCtrl,
+                label: AppStrings.settingsBranchNameField,
+              ),
+              _DialogField(
+                controller: _addressCtrl,
+                label: AppStrings.settingsBranchAddressField,
+              ),
+              _DialogField(
+                controller: _cityCtrl,
+                label: AppStrings.settingsBranchCityField,
+              ),
+              _DialogField(
+                controller: _countryCtrl,
+                label: AppStrings.settingsBranchCountryField,
+              ),
+              _DialogField(
+                controller: _phoneCtrl,
+                label: AppStrings.settingsBranchPhoneField,
+              ),
+              _DialogField(
+                controller: _emailCtrl,
+                label: AppStrings.settingsBranchEmailField,
+              ),
             ],
           ),
         ),
@@ -2675,7 +2719,7 @@ class _BranchDialogState extends State<_BranchDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.dialogCancel),
         ),
         FilledButton(
           onPressed: _saving
@@ -2714,7 +2758,7 @@ class _BranchDialogState extends State<_BranchDialog> {
                     color: Colors.white,
                   ),
                 )
-              : const Text('Save'),
+              : Text(AppStrings.dialogSave),
         ),
       ],
     );
@@ -2767,7 +2811,9 @@ class _ServiceDialogState extends State<_ServiceDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        widget.service != null ? 'Edit Service' : 'Add Service',
+        widget.service != null
+            ? AppStrings.settingsServiceDialogEdit
+            : AppStrings.settingsServiceDialogAdd,
         style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
       ),
       content: SizedBox(
@@ -2776,20 +2822,23 @@ class _ServiceDialogState extends State<_ServiceDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _DialogField(controller: _nameCtrl, label: 'Service Name *'),
+              _DialogField(
+                controller: _nameCtrl,
+                label: AppStrings.settingsServiceNameField,
+              ),
               _DialogField(
                 controller: _descCtrl,
-                label: 'Description',
+                label: AppStrings.settingsServiceDescField,
                 maxLines: 2,
               ),
               _DialogField(
                 controller: _priceCtrl,
-                label: 'Display Price',
+                label: AppStrings.settingsServicePriceField,
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 12),
               _StepperRow(
-                label: 'Duration (minutes)',
+                label: AppStrings.settingsServiceDurationField,
                 value: _duration,
                 min: 15,
                 max: 480,
@@ -2797,7 +2846,7 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                 onChanged: (v) => setState(() => _duration = v),
               ),
               _StepperRow(
-                label: 'Buffer before (min)',
+                label: AppStrings.settingsServiceBufferBeforeField,
                 value: _bufferBefore,
                 min: 0,
                 max: 60,
@@ -2805,7 +2854,7 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                 onChanged: (v) => setState(() => _bufferBefore = v),
               ),
               _StepperRow(
-                label: 'Buffer after (min)',
+                label: AppStrings.settingsServiceBufferAfterField,
                 value: _bufferAfter,
                 min: 0,
                 max: 60,
@@ -2813,8 +2862,8 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                 onChanged: (v) => setState(() => _bufferAfter = v),
               ),
               _ToggleRow(
-                label: 'Active',
-                subtitle: 'Service is available for booking',
+                label: AppStrings.settingsServiceActiveLabel,
+                subtitle: AppStrings.settingsServiceActiveSubtitle,
                 value: _isActive,
                 onChanged: (v) => setState(() => _isActive = v),
               ),
@@ -2825,7 +2874,7 @@ class _ServiceDialogState extends State<_ServiceDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.dialogCancel),
         ),
         FilledButton(
           onPressed: _saving
@@ -2857,7 +2906,7 @@ class _ServiceDialogState extends State<_ServiceDialog> {
                     color: Colors.white,
                   ),
                 )
-              : const Text('Save'),
+              : Text(AppStrings.dialogSave),
         ),
       ],
     );
@@ -2912,7 +2961,9 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        widget.employee != null ? 'Edit Employee' : 'Add Employee',
+        widget.employee != null
+            ? AppStrings.settingsEmployeeDialogEdit
+            : AppStrings.settingsEmployeeDialogAdd,
         style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
       ),
       content: SizedBox(
@@ -2921,20 +2972,35 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _DialogField(controller: _firstNameCtrl, label: 'First Name *'),
-              _DialogField(controller: _lastNameCtrl, label: 'Last Name *'),
-              _DialogField(controller: _emailCtrl, label: 'Email'),
-              _DialogField(controller: _phoneCtrl, label: 'Phone'),
-              _DialogField(controller: _titleCtrl, label: 'Title / Role'),
+              _DialogField(
+                controller: _firstNameCtrl,
+                label: AppStrings.settingsEmployeeFirstNameField,
+              ),
+              _DialogField(
+                controller: _lastNameCtrl,
+                label: AppStrings.settingsEmployeeLastNameField,
+              ),
+              _DialogField(
+                controller: _emailCtrl,
+                label: AppStrings.settingsEmployeeEmailField,
+              ),
+              _DialogField(
+                controller: _phoneCtrl,
+                label: AppStrings.settingsEmployeePhoneField,
+              ),
+              _DialogField(
+                controller: _titleCtrl,
+                label: AppStrings.settingsEmployeeTitleField,
+              ),
               _ToggleRow(
-                label: 'Bookable',
-                subtitle: 'Customers can book this employee',
+                label: AppStrings.settingsEmployeeBookable,
+                subtitle: AppStrings.settingsEmployeeBookableSubtitle,
                 value: _isBookable,
                 onChanged: (v) => setState(() => _isBookable = v),
               ),
               _ToggleRow(
-                label: 'Active',
-                subtitle: 'Employee is currently working',
+                label: AppStrings.settingsEmployeeActiveLabel,
+                subtitle: AppStrings.settingsEmployeeActiveSubtitle,
                 value: _status == 'active',
                 onChanged: (v) =>
                     setState(() => _status = v ? 'active' : 'inactive'),
@@ -2946,7 +3012,7 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.dialogCancel),
         ),
         FilledButton(
           onPressed: _saving
@@ -2984,7 +3050,7 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                     color: Colors.white,
                   ),
                 )
-              : const Text('Save'),
+              : Text(AppStrings.dialogSave),
         ),
       ],
     );
@@ -3059,7 +3125,7 @@ class _AddBreakDialogState extends State<_AddBreakDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        'Add Break',
+        AppStrings.settingsBreakDialogTitle,
         style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
       ),
       content: SizedBox(
@@ -3067,19 +3133,22 @@ class _AddBreakDialogState extends State<_AddBreakDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _DialogField(controller: _nameCtrl, label: 'Break Name'),
+            _DialogField(
+              controller: _nameCtrl,
+              label: AppStrings.settingsBreakNameField,
+            ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String?>(
               initialValue: _dayOfWeek,
-              decoration: const InputDecoration(
-                labelText: 'Day (leave empty for all days)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppStrings.settingsBreakDayField,
+                border: const OutlineInputBorder(),
               ),
               items: _days
                   .map(
                     (d) => DropdownMenuItem(
                       value: d,
-                      child: Text(d ?? 'All days'),
+                      child: Text(d ?? AppStrings.settingsAllDays),
                     ),
                   )
                   .toList(),
@@ -3091,9 +3160,9 @@ class _AddBreakDialogState extends State<_AddBreakDialog> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     initialValue: _startTime,
-                    decoration: const InputDecoration(
-                      labelText: 'Start',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: AppStrings.settingsBreakStartField,
+                      border: const OutlineInputBorder(),
                     ),
                     items: _times
                         .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -3106,9 +3175,9 @@ class _AddBreakDialogState extends State<_AddBreakDialog> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     initialValue: _endTime,
-                    decoration: const InputDecoration(
-                      labelText: 'End',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: AppStrings.settingsBreakEndField,
+                      border: const OutlineInputBorder(),
                     ),
                     items: _times
                         .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -3125,7 +3194,7 @@ class _AddBreakDialogState extends State<_AddBreakDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.dialogCancel),
         ),
         FilledButton(
           onPressed: _saving
@@ -3141,7 +3210,7 @@ class _AddBreakDialogState extends State<_AddBreakDialog> {
                   setState(() => _saving = false);
                 },
           style: FilledButton.styleFrom(backgroundColor: AppTheme.secondary),
-          child: const Text('Add Break'),
+          child: Text(AppStrings.settingsBreakAddButton),
         ),
       ],
     );
@@ -3181,7 +3250,7 @@ class _AddTimeOffDialogState extends State<_AddTimeOffDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        'Add Time Off',
+        AppStrings.settingsTimeOffDialogTitle,
         style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
       ),
       content: SizedBox(
@@ -3191,9 +3260,9 @@ class _AddTimeOffDialogState extends State<_AddTimeOffDialog> {
           children: [
             DropdownButtonFormField<String>(
               initialValue: _type,
-              decoration: const InputDecoration(
-                labelText: 'Type',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppStrings.settingsTimeOffTypeField,
+                border: const OutlineInputBorder(),
               ),
               items: _types
                   .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -3201,7 +3270,10 @@ class _AddTimeOffDialogState extends State<_AddTimeOffDialog> {
               onChanged: (v) => v != null ? setState(() => _type = v) : null,
             ),
             const SizedBox(height: 12),
-            _DialogField(controller: _reasonCtrl, label: 'Reason (optional)'),
+            _DialogField(
+              controller: _reasonCtrl,
+              label: AppStrings.settingsTimeOffReasonField,
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -3250,7 +3322,7 @@ class _AddTimeOffDialogState extends State<_AddTimeOffDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.dialogCancel),
         ),
         FilledButton(
           onPressed: _saving
@@ -3280,7 +3352,7 @@ class _AddTimeOffDialogState extends State<_AddTimeOffDialog> {
                   setState(() => _saving = false);
                 },
           style: FilledButton.styleFrom(backgroundColor: AppTheme.secondary),
-          child: const Text('Add Time Off'),
+          child: Text(AppStrings.settingsTimeOffAddButton),
         ),
       ],
     );
@@ -3336,7 +3408,7 @@ class _ExceptionDialogState extends State<_ExceptionDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        'Add Holiday / Exception',
+        AppStrings.settingsExceptionDialogTitle,
         style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
       ),
       content: SizedBox(
@@ -3362,19 +3434,22 @@ class _ExceptionDialogState extends State<_ExceptionDialog> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _type,
-              decoration: const InputDecoration(
-                labelText: 'Type',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppStrings.settingsExceptionTypeField,
+                border: const OutlineInputBorder(),
               ),
-              items: const [
-                DropdownMenuItem(value: 'holiday', child: Text('Holiday')),
+              items: [
+                DropdownMenuItem(
+                  value: 'holiday',
+                  child: Text(AppStrings.settingsExceptionTypeHoliday),
+                ),
                 DropdownMenuItem(
                   value: 'closed',
-                  child: Text('Business Closure'),
+                  child: Text(AppStrings.settingsExceptionTypeClosed),
                 ),
                 DropdownMenuItem(
                   value: 'modified_hours',
-                  child: Text('Modified Hours'),
+                  child: Text(AppStrings.settingsExceptionTypeModified),
                 ),
               ],
               onChanged: (v) {
@@ -3389,7 +3464,7 @@ class _ExceptionDialogState extends State<_ExceptionDialog> {
             ),
             const SizedBox(height: 12),
             _ToggleRow(
-              label: 'Closed all day',
+              label: AppStrings.settingsExceptionClosedAllDay,
               value: _isClosed,
               onChanged: (v) => setState(() => _isClosed = v),
             ),
@@ -3400,9 +3475,9 @@ class _ExceptionDialogState extends State<_ExceptionDialog> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _openTime,
-                      decoration: const InputDecoration(
-                        labelText: 'Open',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: AppStrings.settingsExceptionOpenField,
+                        border: const OutlineInputBorder(),
                       ),
                       items: _times
                           .map(
@@ -3417,9 +3492,9 @@ class _ExceptionDialogState extends State<_ExceptionDialog> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _closeTime,
-                      decoration: const InputDecoration(
-                        labelText: 'Close',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: AppStrings.settingsExceptionCloseField,
+                        border: const OutlineInputBorder(),
                       ),
                       items: _times
                           .map(
@@ -3436,7 +3511,7 @@ class _ExceptionDialogState extends State<_ExceptionDialog> {
             const SizedBox(height: 12),
             _DialogField(
               controller: _reasonCtrl,
-              label: 'Reason (e.g. Christmas)',
+              label: AppStrings.settingsExceptionReasonField,
             ),
           ],
         ),
@@ -3444,7 +3519,7 @@ class _ExceptionDialogState extends State<_ExceptionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.dialogCancel),
         ),
         FilledButton(
           onPressed: _saving
@@ -3464,7 +3539,7 @@ class _ExceptionDialogState extends State<_ExceptionDialog> {
                   setState(() => _saving = false);
                 },
           style: FilledButton.styleFrom(backgroundColor: AppTheme.secondary),
-          child: const Text('Add Exception'),
+          child: Text(AppStrings.settingsExceptionAddButton),
         ),
       ],
     );

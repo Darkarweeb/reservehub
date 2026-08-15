@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../features/management/domain/entities/management_entities.dart';
 import '../../features/management/presentation/providers/management_provider.dart';
+import '../../localization/app_strings.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/empty_state_widget.dart';
 import './widgets/customer_filter_widget.dart';
@@ -74,7 +75,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                   child: Row(
                     children: [
                       Text(
-                        'Customers',
+                        AppStrings.customersTitle,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
@@ -92,7 +93,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          '${provider.customersTotal} total',
+                          '${provider.customersTotal} ${AppStrings.customerTotal}',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -121,10 +122,12 @@ class _CustomersScreenState extends State<CustomersScreen> {
                       : customers.isEmpty
                       ? EmptyStateWidget(
                           icon: Icons.people_outline_rounded,
-                          title: 'No customers found',
+                          title: _searchQuery.isNotEmpty
+                              ? AppStrings.customerNoResults
+                              : AppStrings.customerNoCustomers,
                           subtitle: _searchQuery.isNotEmpty
-                              ? 'Try a different search term'
-                              : 'Customers will appear here after their first booking',
+                              ? AppStrings.customerNoResultsSubtitle
+                              : AppStrings.customerNoCustomersSubtitle,
                         )
                       : RefreshIndicator(
                           onRefresh: _onRefresh,
@@ -259,7 +262,9 @@ class _CustomerCrmCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      customer.status,
+                      customer.isActive
+                          ? AppStrings.customerStatusActive
+                          : AppStrings.inactive,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
@@ -276,7 +281,8 @@ class _CustomerCrmCard extends StatelessWidget {
                 children: [
                   _StatChip(
                     icon: Icons.calendar_today_outlined,
-                    label: '${customer.totalVisits} visits',
+                    label:
+                        '${customer.totalVisits} ${AppStrings.customerVisits}',
                   ),
                   const SizedBox(width: 8),
                   _StatChip(
@@ -339,18 +345,18 @@ class _CustomerCrmCard extends StatelessWidget {
 
   String _fmtDate(DateTime d) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      AppStrings.monthJan,
+      AppStrings.monthFeb,
+      AppStrings.monthMar,
+      AppStrings.monthApr,
+      AppStrings.monthMay,
+      AppStrings.monthJun,
+      AppStrings.monthJul,
+      AppStrings.monthAug,
+      AppStrings.monthSep,
+      AppStrings.monthOct,
+      AppStrings.monthNov,
+      AppStrings.monthDec,
     ];
     return '${months[d.month - 1]} ${d.day}';
   }

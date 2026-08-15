@@ -8,6 +8,8 @@ import '../config/dev_config.dart';
 import '../core/app_export.dart';
 import '../core/di/service_locator.dart';
 import '../core/logging/app_logger.dart';
+import '../features/appointments/domain/repositories/appointment_lifecycle_repository.dart';
+import '../features/appointments/presentation/providers/appointment_lifecycle_provider.dart';
 import '../features/authentication/domain/repositories/auth_repository.dart';
 import '../features/authentication/presentation/providers/auth_provider.dart';
 import '../features/business/domain/repositories/business_repository.dart';
@@ -121,6 +123,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<TimeBlockProvider>(
           create: (_) => TimeBlockProvider(
             repository: ServiceLocator.get<TimeBlockRepository>(),
+          ),
+        ),
+        ChangeNotifierProvider<AppointmentLifecycleProvider>(
+          create: (_) => AppointmentLifecycleProvider(
+            repository: ServiceLocator.get<AppointmentLifecycleRepository>(),
           ),
         ),
         // ─── Public Experience Providers ──────────────────────────────────

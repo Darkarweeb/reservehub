@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_export.dart';
+import '../../../localization/app_strings.dart';
 
 class DashboardAppBarWidget extends StatelessWidget {
   const DashboardAppBarWidget({super.key});
@@ -12,9 +13,9 @@ class DashboardAppBarWidget extends StatelessWidget {
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning,';
-    if (hour < 17) return 'Good afternoon,';
-    return 'Good evening,';
+    if (hour < 12) return '${AppStrings.goodMorning},';
+    if (hour < 17) return '${AppStrings.goodAfternoon},';
+    return '${AppStrings.goodEvening},';
   }
 
   @override

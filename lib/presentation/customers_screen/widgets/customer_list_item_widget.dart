@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_export.dart';
+import '../../../localization/app_strings.dart';
 
 class CustomerListItemWidget extends StatefulWidget {
   final Map<String, dynamic> customer;
@@ -91,22 +92,35 @@ class _CustomerListItemWidgetState extends State<CustomerListItemWidget>
     }
   }
 
+  String _localizedStatus(String status) {
+    switch (status) {
+      case 'Active':
+        return AppStrings.customerStatusActive;
+      case 'At-Risk':
+        return AppStrings.customerStatusAtRisk;
+      case 'New':
+        return AppStrings.customerStatusNew;
+      default:
+        return status;
+    }
+  }
+
   String _formatDate(String dateStr) {
     try {
       final d = DateTime.parse(dateStr);
       const months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
+        AppStrings.monthJan,
+        AppStrings.monthFeb,
+        AppStrings.monthMar,
+        AppStrings.monthApr,
+        AppStrings.monthMay,
+        AppStrings.monthJun,
+        AppStrings.monthJul,
+        AppStrings.monthAug,
+        AppStrings.monthSep,
+        AppStrings.monthOct,
+        AppStrings.monthNov,
+        AppStrings.monthDec,
       ];
       return '${months[d.month - 1]} ${d.day}';
     } catch (_) {
@@ -250,7 +264,7 @@ class _CustomerListItemWidgetState extends State<CustomerListItemWidget>
                               ),
                               const SizedBox(width: 3),
                               Text(
-                                status,
+                                _localizedStatus(status),
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -269,7 +283,7 @@ class _CustomerListItemWidgetState extends State<CustomerListItemWidget>
                               ),
                               const SizedBox(width: 3),
                               Text(
-                                'Last visit: ${_formatDate(c['lastVisit'] as String)}',
+                                '${AppStrings.customerLastVisitLabel} ${_formatDate(c['lastVisit'] as String)}',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   color: const Color(0xFF94A3B8),
@@ -299,7 +313,7 @@ class _CustomerListItemWidgetState extends State<CustomerListItemWidget>
                           Row(
                             children: [
                               Text(
-                                '\$${(c['totalSpent'] as double).toStringAsFixed(0)} total',
+                                '\$${(c['totalSpent'] as double).toStringAsFixed(0)} ${AppStrings.customerTotal}',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
@@ -310,7 +324,7 @@ class _CustomerListItemWidgetState extends State<CustomerListItemWidget>
                                 ),
                               ),
                               Text(
-                                ' · ${c['visits']} visits',
+                                ' · ${c['visits']} ${AppStrings.customerVisits}',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   color: const Color(0xFF64748B),
@@ -342,7 +356,7 @@ class _CustomerListItemWidgetState extends State<CustomerListItemWidget>
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        'Book',
+                                        AppStrings.customerBookAction,
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_export.dart';
+import '../../../localization/app_strings.dart';
 
 class FeaturedAppointmentCardWidget extends StatelessWidget {
   FeaturedAppointmentCardWidget({super.key});
@@ -30,7 +31,7 @@ class FeaturedAppointmentCardWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Next Appointment',
+                AppStrings.proximaCita,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
@@ -40,7 +41,7 @@ class FeaturedAppointmentCardWidget extends StatelessWidget {
               TextButton(
                 onPressed: () {},
                 child: Text(
-                  'View all',
+                  AppStrings.verTodas,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -196,7 +197,7 @@ class FeaturedAppointmentCardWidget extends StatelessWidget {
                             onPressed: () {},
                             icon: const Icon(Icons.check_rounded, size: 14),
                             label: Text(
-                              'Confirm',
+                              AppStrings.confirm,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
