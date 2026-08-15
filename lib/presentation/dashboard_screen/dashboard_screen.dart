@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../routes/app_routes.dart';
+import '../../navigation/route_names.dart';
+import '../../shared/utils/responsive_builder.dart';
 import '../../theme/app_theme.dart';
 import './widgets/dashboard_app_bar_widget.dart';
 import './widgets/dashboard_chart_widget.dart';
@@ -19,7 +20,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  // TODO: Replace with Riverpod DashboardNotifier for production
   bool _isLoading = false;
   String _selectedFilter = 'All';
 
@@ -31,14 +31,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.width >= 600;
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       body: SafeArea(
-        child: isTablet ? _buildTabletLayout() : _buildPhoneLayout(),
+        child: ResponsiveBuilder(
+          builder: (context, size) {
+            if (size == ScreenSize.desktop) return _buildDesktopLayout();
+            if (size == ScreenSize.tablet) return _buildTabletLayout();
+            return _buildPhoneLayout();
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(AppRoutes.newAppointment),
+        onPressed: () => context.push(RouteNames.newAppointment),
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
@@ -99,6 +104,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
           flex: 4,
           child: SingleChildScrollView(
             padding: const EdgeInsets.only(top: 16, right: 16),
+            child: Column(
+              children: [
+                FeaturedAppointmentCardWidget(),
+                const SizedBox(height: 16),
+                TodaysAppointmentsWidget(),
+                const SizedBox(height: 120),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 7,
+          child: RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: AppTheme.secondary,
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(child: DashboardAppBarWidget()),
+                SliverToBoxAdapter(child: DashboardKpiWidget()),
+                SliverToBoxAdapter(
+                  child: ServiceFilterWidget(
+                    selected: _selectedFilter,
+                    onSelected: (v) => setState(() => _selectedFilter = v),
+                  ),
+                ),
+                SliverToBoxAdapter(child: DashboardChartWidget()),
+                const SliverToBoxAdapter(child: SizedBox(height: 120)),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 340,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(top: 16, right: 24),
             child: Column(
               children: [
                 FeaturedAppointmentCardWidget(),

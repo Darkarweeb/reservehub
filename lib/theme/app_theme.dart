@@ -93,7 +93,7 @@ class AppTheme {
       ),
     ),
     scaffoldBackgroundColor: backgroundLight,
-    appBarTheme: AppBarTheme(
+    appBarTheme: AppBarThemeData(
       backgroundColor: surfaceLight,
       elevation: 0,
       scrolledUnderElevation: 1,
@@ -111,7 +111,7 @@ class AppTheme {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: EdgeInsets.zero,
     ),
-    inputDecorationTheme: InputDecorationTheme(
+    inputDecorationTheme: InputDecorationThemeData(
       filled: true,
       fillColor: surfaceVariantLight,
       border: OutlineInputBorder(
@@ -238,7 +238,7 @@ class AppTheme {
         ),
       ),
     ),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: const AppBarThemeData(
       backgroundColor: surfaceDark,
       elevation: 0,
       scrolledUnderElevation: 1,
@@ -250,7 +250,7 @@ class AppTheme {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: EdgeInsets.zero,
     ),
-    inputDecorationTheme: InputDecorationTheme(
+    inputDecorationTheme: InputDecorationThemeData(
       filled: true,
       fillColor: surfaceVariantDark,
       border: OutlineInputBorder(

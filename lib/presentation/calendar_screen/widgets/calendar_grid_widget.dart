@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../features/scheduling/domain/repositories/appointment_repository.dart';
 import '../../../theme/app_theme.dart';
 
 class CalendarGridWidget extends StatelessWidget {
@@ -7,12 +8,14 @@ class CalendarGridWidget extends StatelessWidget {
   final DateTime selectedDay;
   final ValueChanged<DateTime> onDaySelected;
   final ValueChanged<DateTime> onMonthChanged;
+  final List<CalendarDaySummaryEntity> monthSummary;
 
   const CalendarGridWidget({
     required this.focusedMonth,
     required this.selectedDay,
     required this.onDaySelected,
     required this.onMonthChanged,
+    this.monthSummary = const [],
     super.key,
   });
 
@@ -40,8 +43,25 @@ class CalendarGridWidget extends StatelessWidget {
     'December',
   ];
 
-  // Mock busy days — days with appointments
-  final Set<int> _busyDays = const {3, 7, 8, 12, 14, 15, 18, 21, 22, 25, 28};
+  bool _hasAppointments(int day) {
+    return monthSummary.any(
+      (s) =>
+          s.date.year == focusedMonth.year &&
+          s.date.month == focusedMonth.month &&
+          s.date.day == day &&
+          s.hasAppointments,
+    );
+  }
+
+  bool _hasBlock(int day) {
+    return monthSummary.any(
+      (s) =>
+          s.date.year == focusedMonth.year &&
+          s.date.month == focusedMonth.month &&
+          s.date.day == day &&
+          s.hasBlock,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +168,8 @@ class CalendarGridWidget extends StatelessWidget {
                   DateTime.now().year == date.year &&
                   DateTime.now().month == date.month &&
                   DateTime.now().day == date.day;
-              final hasBusy = _busyDays.contains(day);
+              final hasBusy = _hasAppointments(day);
+              final hasBlock = _hasBlock(day);
 
               return GestureDetector(
                 onTap: () => onDaySelected(date),
@@ -180,14 +201,30 @@ class CalendarGridWidget extends StatelessWidget {
                               : const Color(0xFF374151),
                         ),
                       ),
+                      // Appointment dot (blue)
                       if (hasBusy && !isSelected)
                         Positioned(
                           bottom: 2,
+                          left: hasBlock ? 8 : null,
                           child: Container(
                             width: 4,
                             height: 4,
                             decoration: BoxDecoration(
                               color: AppTheme.secondary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      // Block dot (amber)
+                      if (hasBlock && !isSelected)
+                        Positioned(
+                          bottom: 2,
+                          right: hasBusy ? 8 : null,
+                          child: Container(
+                            width: 4,
+                            height: 4,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFD97706),
                               shape: BoxShape.circle,
                             ),
                           ),

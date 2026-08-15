@@ -1,111 +1,215 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
+import '../../../features/management/presentation/providers/management_provider.dart';
 import '../../../theme/app_theme.dart';
 
-class _KpiData {
-  final String label;
-  final String value;
-  final String change;
-  final bool isPositive;
-  final bool isAlert;
-  final IconData icon;
-  final Color color;
-  final Color bgColor;
-
-  const _KpiData({
-    required this.label,
-    required this.value,
-    required this.change,
-    required this.isPositive,
-    required this.isAlert,
-    required this.icon,
-    required this.color,
-    required this.bgColor,
-  });
-}
-
-class DashboardKpiWidget extends StatelessWidget {
+class DashboardKpiWidget extends StatefulWidget {
   const DashboardKpiWidget({super.key});
 
-  final List<_KpiData> _kpis = const [
-    _KpiData(
-      label: "Today's Appts",
-      value: '14',
-      change: '+3 vs yesterday',
-      isPositive: true,
-      isAlert: false,
-      icon: Icons.calendar_today_rounded,
-      color: AppTheme.secondary,
-      bgColor: AppTheme.secondaryContainer,
-    ),
-    _KpiData(
-      label: 'Revenue Today',
-      value: '\$1,840',
-      change: '+12% vs avg',
-      isPositive: true,
-      isAlert: false,
-      icon: Icons.attach_money_rounded,
-      color: AppTheme.success,
-      bgColor: AppTheme.successContainer,
-    ),
-    _KpiData(
-      label: 'No-Shows',
-      value: '3',
-      change: '↑ High today',
-      isPositive: false,
-      isAlert: true,
-      icon: Icons.person_off_outlined,
-      color: AppTheme.error,
-      bgColor: AppTheme.errorContainer,
-    ),
-    _KpiData(
-      label: 'Occupancy',
-      value: '78%',
-      change: '2 slots open',
-      isPositive: true,
-      isAlert: false,
-      icon: Icons.donut_small_rounded,
-      color: Color(0xFF7C3AED),
-      bgColor: Color(0xFFF3E8FF),
-    ),
-  ];
+  @override
+  State<DashboardKpiWidget> createState() => _DashboardKpiWidgetState();
+}
+
+class _DashboardKpiWidgetState extends State<DashboardKpiWidget> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<ManagementProvider>();
+      if (provider.kpis == null && !provider.kpisLoading) {
+        provider.initialize().then((_) => provider.loadDashboardKpis());
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Consumer<ManagementProvider>(
+      builder: (context, provider, _) {
+        final kpis = provider.kpis;
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Today's Overview",
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        Text(
+                          _formattedDate(),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (provider.kpisLoading)
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else
+                    IconButton(
+                      onPressed: () => provider.loadDashboardKpis(),
+                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                      color: const Color(0xFF94A3B8),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              if (provider.kpisLoading && kpis == null)
+                _buildSkeletonGrid()
+              else if (provider.kpisError != null && kpis == null)
+                _buildErrorState(provider.kpisError!)
+              else
+                _buildKpiGrid(kpis),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildKpiGrid(dynamic kpis) {
+    final todayCount = kpis?.todayCount ?? 0;
+    final yesterdayCount = kpis?.yesterdayCount ?? 0;
+    final upcomingCount = kpis?.upcomingCount ?? 0;
+    final completedCount = kpis?.completedCount ?? 0;
+    final cancelledCount = kpis?.cancelledCount ?? 0;
+    final customerCount = kpis?.customerCount ?? 0;
+    final appointmentValue = kpis?.appointmentValue ?? 0.0;
+    final todayDelta = todayCount - yesterdayCount;
+
+    final kpiList = [
+      _KpiData(
+        label: "Today's Appts",
+        value: '$todayCount',
+        change: todayDelta >= 0
+            ? '+$todayDelta vs yesterday'
+            : '$todayDelta vs yesterday',
+        isPositive: todayDelta >= 0,
+        isAlert: false,
+        icon: Icons.calendar_today_rounded,
+        color: AppTheme.secondary,
+        bgColor: AppTheme.secondaryContainer,
+      ),
+      _KpiData(
+        label: 'Appt Value',
+        value: '\$${appointmentValue.toStringAsFixed(0)}',
+        change: 'Informational only',
+        isPositive: true,
+        isAlert: false,
+        icon: Icons.attach_money_rounded,
+        color: AppTheme.success,
+        bgColor: AppTheme.successContainer,
+      ),
+      _KpiData(
+        label: 'Cancelled',
+        value: '$cancelledCount',
+        change: cancelledCount > 0 ? 'Today' : 'None today',
+        isPositive: cancelledCount == 0,
+        isAlert: cancelledCount > 2,
+        icon: Icons.person_off_outlined,
+        color: AppTheme.error,
+        bgColor: AppTheme.errorContainer,
+      ),
+      _KpiData(
+        label: 'Customers',
+        value: '$customerCount',
+        change: '$upcomingCount upcoming',
+        isPositive: true,
+        isAlert: false,
+        icon: Icons.people_outline_rounded,
+        color: const Color(0xFF7C3AED),
+        bgColor: const Color(0xFFF3E8FF),
+      ),
+    ];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.6,
+      ),
+      itemCount: kpiList.length,
+      itemBuilder: (context, i) => _KpiCard(data: kpiList[i]),
+    );
+  }
+
+  Widget _buildSkeletonGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.6,
+      ),
+      itemCount: 4,
+      itemBuilder: (context, i) => Container(
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceLight,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.outlineVariantLight),
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.outlineLight),
+      ),
+      child: Row(
         children: [
-          Text(
-            "Today's Overview",
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.primary,
+          const Icon(Icons.info_outline, color: Color(0xFF94A3B8), size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Dashboard data unavailable. Complete onboarding to see live KPIs.',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: const Color(0xFF94A3B8),
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _formattedDate(),
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF94A3B8),
-            ),
-          ),
-          const SizedBox(height: 14),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.6,
-            ),
-            itemCount: _kpis.length,
-            itemBuilder: (context, i) => _KpiCard(data: _kpis[i]),
           ),
         ],
       ),
@@ -139,6 +243,28 @@ class DashboardKpiWidget extends StatelessWidget {
     ];
     return '${days[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}, ${now.year}';
   }
+}
+
+class _KpiData {
+  final String label;
+  final String value;
+  final String change;
+  final bool isPositive;
+  final bool isAlert;
+  final IconData icon;
+  final Color color;
+  final Color bgColor;
+
+  const _KpiData({
+    required this.label,
+    required this.value,
+    required this.change,
+    required this.isPositive,
+    required this.isAlert,
+    required this.icon,
+    required this.color,
+    required this.bgColor,
+  });
 }
 
 class _KpiCard extends StatelessWidget {

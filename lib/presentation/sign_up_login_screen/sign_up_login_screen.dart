@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../routes/app_routes.dart';
+import '../../navigation/route_names.dart';
+import '../../shared/utils/responsive_builder.dart';
 import '../../theme/app_theme.dart';
 import './widgets/auth_form_widget.dart';
 import './widgets/onboarding_hero_widget.dart';
@@ -16,7 +17,6 @@ class SignUpLoginScreen extends StatefulWidget {
 
 class _SignUpLoginScreenState extends State<SignUpLoginScreen>
     with SingleTickerProviderStateMixin {
-  // TODO: Replace with Riverpod AuthNotifier for production
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -52,19 +52,22 @@ class _SignUpLoginScreenState extends State<SignUpLoginScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.width >= 600;
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: isTablet ? _buildTabletLayout() : _buildPhoneLayout(),
+      body: ResponsiveBuilder(
+        builder: (context, size) {
+          if (size == ScreenSize.desktop) return _buildDesktopLayout();
+          if (size == ScreenSize.tablet) return _buildTabletLayout();
+          return _buildPhoneLayout();
+        },
+      ),
     );
   }
 
   Widget _buildPhoneLayout() {
     return Stack(
       children: [
-        // Hero image top
         const OnboardingHeroWidget(),
-        // Bottom sheet card
         Align(
           alignment: Alignment.bottomCenter,
           child: SlideTransition(
@@ -92,12 +95,183 @@ class _SignUpLoginScreenState extends State<SignUpLoginScreen>
                 const SizedBox(height: 40),
                 _buildBrandHeader(),
                 const SizedBox(height: 32),
-                _buildAuthCard(isTablet: true),
+                _buildAuthCard(isRounded: true),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        // Left panel — brand / hero
+        Expanded(
+          flex: 5,
+          child: Container(
+            color: AppTheme.primary,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(48),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(38),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(
+                            Icons.calendar_today_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'ReserveHub',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 64),
+                    Text(
+                      'Where businesses\nmanage time better.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        height: 1.15,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'The all-in-one booking platform for modern businesses.\nManage appointments, customers, and your team — all in one place.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white.withAlpha(200),
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 48),
+                    _buildFeaturePill(
+                      Icons.calendar_month_rounded,
+                      'Smart Scheduling',
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFeaturePill(
+                      Icons.people_rounded,
+                      'Customer Management',
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFeaturePill(
+                      Icons.bar_chart_rounded,
+                      'Business Analytics',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // Right panel — auth form
+        Expanded(
+          flex: 4,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 48,
+                  vertical: 32,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 440),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome back',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.primary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Sign in to your business portal',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceLight,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withAlpha(15),
+                              blurRadius: 24,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: AuthFormWidget(
+                          onAuthSuccess: () => context.go(RouteNames.dashboard),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeaturePill(IconData icon, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: Colors.white.withAlpha(38),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: Colors.white, size: 16),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withAlpha(220),
+          ),
+        ),
+      ],
     );
   }
 
@@ -140,7 +314,7 @@ class _SignUpLoginScreenState extends State<SignUpLoginScreen>
     );
   }
 
-  Widget _buildAuthCard({bool isTablet = false}) {
+  Widget _buildAuthCard({bool isRounded = false}) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -148,8 +322,8 @@ class _SignUpLoginScreenState extends State<SignUpLoginScreen>
         borderRadius: BorderRadius.only(
           topLeft: const Radius.circular(28),
           topRight: const Radius.circular(28),
-          bottomLeft: Radius.circular(isTablet ? 28 : 0),
-          bottomRight: Radius.circular(isTablet ? 28 : 0),
+          bottomLeft: Radius.circular(isRounded ? 28 : 0),
+          bottomRight: Radius.circular(isRounded ? 28 : 0),
         ),
         boxShadow: [
           BoxShadow(
@@ -160,7 +334,7 @@ class _SignUpLoginScreenState extends State<SignUpLoginScreen>
         ],
       ),
       child: AuthFormWidget(
-        onAuthSuccess: () => context.go(AppRoutes.dashboard),
+        onAuthSuccess: () => context.go(RouteNames.dashboard),
       ),
     );
   }

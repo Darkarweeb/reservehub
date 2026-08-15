@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+import '../../../features/authentication/presentation/providers/auth_provider.dart';
 import '../../../theme/app_theme.dart';
 
 class AuthFormWidget extends StatefulWidget {
@@ -14,7 +16,6 @@ class AuthFormWidget extends StatefulWidget {
 
 class _AuthFormWidgetState extends State<AuthFormWidget>
     with SingleTickerProviderStateMixin {
-  // TODO: Replace with Riverpod AuthNotifier for production
   late TabController _tabController;
   final _loginFormKey = GlobalKey<FormState>();
   final _signupFormKey = GlobalKey<FormState>();
@@ -22,22 +23,17 @@ class _AuthFormWidgetState extends State<AuthFormWidget>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
-  final _businessController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _rememberMe = false;
-  bool _isLoading = false;
-
-  // Demo credentials
-  static const String _demoEmail = 'owner@reservehub.app';
-  static const String _demoPassword = 'Reserve2026!';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() => setState(() {}));
   }
 
   @override
@@ -46,23 +42,22 @@ class _AuthFormWidgetState extends State<AuthFormWidget>
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
-    _businessController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
   Future<void> _handleLogin() async {
     if (!_loginFormKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800));
-    setState(() => _isLoading = false);
-
-    if (_emailController.text.trim() == _demoEmail &&
-        _passwordController.text == _demoPassword) {
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.signIn(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+    if (success && mounted) {
       widget.onAuthSuccess();
-    } else {
+    } else if (mounted && authProvider.errorMessage != null) {
       Fluttertoast.showToast(
-        msg: "Invalid credentials — use the demo account below to sign in",
+        msg: authProvider.errorMessage!,
         toastLength: Toast.LENGTH_LONG,
         backgroundColor: AppTheme.error,
         textColor: Colors.white,
@@ -72,14 +67,28 @@ class _AuthFormWidgetState extends State<AuthFormWidget>
 
   Future<void> _handleSignup() async {
     if (!_signupFormKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800));
-    setState(() => _isLoading = false);
-    widget.onAuthSuccess();
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.signUp(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      displayName: _nameController.text.trim(),
+    );
+    if (success && mounted) {
+      widget.onAuthSuccess();
+    } else if (mounted && authProvider.errorMessage != null) {
+      Fluttertoast.showToast(
+        msg: authProvider.errorMessage!,
+        toastLength: Toast.LENGTH_LONG,
+        backgroundColor: AppTheme.error,
+        textColor: Colors.white,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = context.select<AuthProvider, bool>((p) => p.isLoading);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
       child: Column(
@@ -131,20 +140,21 @@ class _AuthFormWidgetState extends State<AuthFormWidget>
           ),
           const SizedBox(height: 24),
           SizedBox(
-            height: _tabController.index == 0 ? 300 : 420,
+            height: _tabController.index == 0 ? 300 : 400,
             child: TabBarView(
               controller: _tabController,
-              children: [_buildLoginForm(), _buildSignupForm()],
+              children: [
+                _buildLoginForm(isLoading),
+                _buildSignupForm(isLoading),
+              ],
             ),
           ),
-          const SizedBox(height: 20),
-          _buildDemoCredentialsBox(),
         ],
       ),
     );
   }
 
-  Widget _buildLoginForm() {
+  Widget _buildLoginForm(bool isLoading) {
     return Form(
       key: _loginFormKey,
       child: Column(
@@ -230,13 +240,13 @@ class _AuthFormWidgetState extends State<AuthFormWidget>
             ],
           ),
           const SizedBox(height: 16),
-          _buildSubmitButton('Sign In', _handleLogin),
+          _buildSubmitButton('Sign In', _handleLogin, isLoading),
         ],
       ),
     );
   }
 
-  Widget _buildSignupForm() {
+  Widget _buildSignupForm(bool isLoading) {
     return Form(
       key: _signupFormKey,
       child: SingleChildScrollView(
@@ -257,22 +267,6 @@ class _AuthFormWidgetState extends State<AuthFormWidget>
               ),
               validator: (v) =>
                   (v == null || v.length < 2) ? 'Enter your name' : null,
-            ),
-            const SizedBox(height: 12),
-            _buildLabel('Business Name'),
-            const SizedBox(height: 6),
-            TextFormField(
-              controller: _businessController,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-              decoration: const InputDecoration(
-                hintText: 'Your business name',
-                prefixIcon: Icon(Icons.business_outlined, size: 18),
-              ),
-              validator: (v) =>
-                  (v == null || v.isEmpty) ? 'Enter business name' : null,
             ),
             const SizedBox(height: 12),
             _buildLabel('Email Address'),
@@ -349,7 +343,7 @@ class _AuthFormWidgetState extends State<AuthFormWidget>
                   : null,
             ),
             const SizedBox(height: 16),
-            _buildSubmitButton('Create Account', _handleSignup),
+            _buildSubmitButton('Create Account', _handleSignup, isLoading),
             const SizedBox(height: 12),
             Center(
               child: RichText(
@@ -399,12 +393,12 @@ class _AuthFormWidgetState extends State<AuthFormWidget>
     );
   }
 
-  Widget _buildSubmitButton(String label, VoidCallback onTap) {
+  Widget _buildSubmitButton(String label, VoidCallback onTap, bool isLoading) {
     return SizedBox(
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: _isLoading ? null : onTap,
+        onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.primary,
           foregroundColor: Colors.white,
@@ -413,7 +407,7 @@ class _AuthFormWidgetState extends State<AuthFormWidget>
           ),
           elevation: 0,
         ),
-        child: _isLoading
+        child: isLoading
             ? const SizedBox(
                 width: 22,
                 height: 22,
@@ -430,109 +424,6 @@ class _AuthFormWidgetState extends State<AuthFormWidget>
                 ),
               ),
       ),
-    );
-  }
-
-  Widget _buildDemoCredentialsBox() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.secondary.withAlpha(77)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.info_outline_rounded,
-                size: 16,
-                color: AppTheme.secondary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Demo Account',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.secondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          _buildCredentialRow('Email', _demoEmail),
-          const SizedBox(height: 6),
-          _buildCredentialRow('Password', _demoPassword),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                _emailController.text = _demoEmail;
-                _passwordController.text = _demoPassword;
-                if (_tabController.index != 0) _tabController.animateTo(0);
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.secondary,
-                side: const BorderSide(color: AppTheme.secondary),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-              ),
-              child: Text(
-                'Use Demo Account',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCredentialRow(String label, String value) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 64,
-          child: Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF64748B),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primary,
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            if (label == 'Email') _emailController.text = value;
-            if (label == 'Password') _passwordController.text = value;
-          },
-          child: const Icon(
-            Icons.copy_rounded,
-            size: 14,
-            color: AppTheme.secondary,
-          ),
-        ),
-      ],
     );
   }
 }
